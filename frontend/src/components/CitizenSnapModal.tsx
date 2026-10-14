@@ -79,6 +79,17 @@ export const CitizenSnapModal: React.FC<CitizenSnapModalProps> = ({
       });
       setScrambleResult(res);
       onAutoScrambled(res);
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        try {
+          const utterance = new SpeechSynthesisUtterance(
+            `Accident reported. Nearest 108 ambulance ${res.assigned_ambulance_callsign} dispatched with arrival in ${res.eta_minutes} minutes.`
+          );
+          utterance.rate = 1.05;
+          window.speechSynthesis.speak(utterance);
+        } catch {
+          // Graceful fallback
+        }
+      }
     } catch (err) {
       alert(`Accident intake failed: ${err}`);
     } finally {

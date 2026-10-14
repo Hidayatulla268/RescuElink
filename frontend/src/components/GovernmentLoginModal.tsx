@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GovernmentUser, GovernmentRole } from '../types';
 import { SAMPLE_LOGINS, createGovUserFromSample } from '../services/sampleLogins';
+import { api } from '../services/api';
 import { 
   ShieldCheck, X, Building2, Flame, HeartPulse, Shield, 
   Radio, CheckCircle2, Lock, UserCheck, KeyRound, AlertCircle, ArrowRight, Sparkles
@@ -39,13 +40,23 @@ export const GovernmentLoginModal: React.FC<GovernmentLoginModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSelectSample = (sample: typeof SAMPLE_LOGINS[0]) => {
+  const handleSelectSample = async (sample: typeof SAMPLE_LOGINS[0]) => {
+    try {
+      await api.govLogin({
+        badge_id: sample.username,
+        role: sample.role,
+        name: sample.name,
+        department: sample.agency
+      });
+    } catch (e) {
+      console.warn('Backend login token issue, falling back to local session', e);
+    }
     const user = createGovUserFromSample(sample);
     onLogin(user);
     onClose();
   };
 
-  const handleCustomSubmit = (e: React.FormEvent) => {
+  const handleCustomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
     const query = customBadge.trim().toUpperCase();
@@ -56,6 +67,16 @@ export const GovernmentLoginModal: React.FC<GovernmentLoginModalProps> = ({
       if (customPassword.trim() && customPassword.trim() !== matched.passwordHint) {
         setLoginError(`Incorrect password. (Hint for ${matched.username}: ${matched.passwordHint})`);
         return;
+      }
+      try {
+        await api.govLogin({
+          badge_id: matched.username,
+          role: matched.role,
+          name: matched.name,
+          department: matched.agency
+        });
+      } catch (err) {
+        console.warn('Backend login token issue', err);
       }
       onLogin(createGovUserFromSample(matched));
       onClose();
@@ -74,6 +95,16 @@ export const GovernmentLoginModal: React.FC<GovernmentLoginModalProps> = ({
       clearanceLevel: 'LEVEL_1_PARAMEDIC',
       loggedAt: new Date().toISOString()
     };
+    try {
+      await api.govLogin({
+        badge_id: user.badgeNumber,
+        role: user.role,
+        name: user.fullName,
+        department: user.agencyName
+      });
+    } catch (err) {
+      console.warn('Backend login token issue', err);
+    }
     onLogin(user);
     onClose();
   };

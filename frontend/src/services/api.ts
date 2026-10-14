@@ -18,15 +18,59 @@ import {
 const API_BASE = 'http://localhost:8000/api/v1';
 const WS_BASE = 'ws://localhost:8000/api/v1/ws/events';
 
+export interface DispatchUnitsResponse {
+  incident_id: string;
+  status: string;
+  dispatched_units: ResponderUnit[];
+  timestamp: string;
+}
+
+export interface ResolveIncidentResponse {
+  status: string;
+  incident_id: string;
+}
+
+export interface GovLoginPayload {
+  badge_id: string;
+  role: string;
+  name: string;
+  department?: string;
+}
+
+export interface GovLoginResponse {
+  access_token: string;
+  token_type: string;
+  user: {
+    badge_id: string;
+    role: string;
+    name: string;
+    department: string;
+    is_verified: boolean;
+  };
+  expires_in_seconds: number;
+  issued_at: string;
+}
+
+function getAuthHeaders(): HeadersInit {
+  const token = localStorage.getItem('rescuenlink_gov_token');
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json'
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
 export const api = {
   async getIncidents(): Promise<Incident[]> {
-    const res = await fetch(`${API_BASE}/incidents`);
+    const res = await fetch(`${API_BASE}/incidents`, { headers: getAuthHeaders() });
     if (!res.ok) throw new Error(`Failed to fetch incidents: ${res.statusText}`);
     return res.json();
   },
 
   async getIncident(id: string): Promise<Incident> {
-    const res = await fetch(`${API_BASE}/incidents/${id}`);
+    const res = await fetch(`${API_BASE}/incidents/${id}`, { headers: getAuthHeaders() });
     if (!res.ok) throw new Error(`Failed to fetch incident ${id}`);
     return res.json();
   },
@@ -34,7 +78,7 @@ export const api = {
   async createIncident(payload: IncidentCreatePayload): Promise<Incident> {
     const res = await fetch(`${API_BASE}/incidents`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(payload)
     });
     if (!res.ok) throw new Error(`Failed to create incident: ${res.statusText}`);
@@ -42,24 +86,27 @@ export const api = {
   },
 
   async getRecommendations(incidentId: string): Promise<RecommendationsResponse> {
-    const res = await fetch(`${API_BASE}/incidents/${incidentId}/recommendations`);
+    const res = await fetch(`${API_BASE}/incidents/${incidentId}/recommendations`, {
+      headers: getAuthHeaders()
+    });
     if (!res.ok) throw new Error(`Failed to fetch recommendations for ${incidentId}`);
     return res.json();
   },
 
-  async dispatchUnits(incidentId: string, unitIds: string[]): Promise<any> {
+  async dispatchUnits(incidentId: string, unitIds: string[]): Promise<DispatchUnitsResponse> {
     const res = await fetch(`${API_BASE}/incidents/${incidentId}/dispatch`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ incident_id: incidentId, unit_ids: unitIds })
     });
     if (!res.ok) throw new Error(`Failed to dispatch units: ${res.statusText}`);
     return res.json();
   },
 
-  async resolveIncident(incidentId: string): Promise<any> {
+  async resolveIncident(incidentId: string): Promise<ResolveIncidentResponse> {
     const res = await fetch(`${API_BASE}/incidents/${incidentId}/resolve`, {
-      method: 'POST'
+      method: 'POST',
+      headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Failed to resolve incident: ${res.statusText}`);
     return res.json();
@@ -67,12 +114,12 @@ export const api = {
 
   async generateBroadcast(
     incidentId: string,
-    languages: string[] = ['English', 'Spanish', 'Hindi', 'French'],
+    languages: string[] = ['Hindi', 'Kannada', 'Tamil', 'English'],
     advisoryType: string = 'EVACUATION_OR_SHELTER'
   ): Promise<CitizenBroadcastResponse> {
     const res = await fetch(`${API_BASE}/incidents/${incidentId}/broadcast`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({
         incident_id: incidentId,
         languages,
@@ -84,40 +131,41 @@ export const api = {
   },
 
   async getUnits(): Promise<ResponderUnit[]> {
-    const res = await fetch(`${API_BASE}/units`);
+    const res = await fetch(`${API_BASE}/units`, { headers: getAuthHeaders() });
     if (!res.ok) throw new Error(`Failed to fetch units: ${res.statusText}`);
     return res.json();
   },
 
   async updateUnitStatus(unitId: string, status: UnitStatus): Promise<ResponderUnit> {
     const res = await fetch(`${API_BASE}/units/${unitId}/status?status=${status}`, {
-      method: 'PATCH'
+      method: 'PATCH',
+      headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Failed to update unit status: ${res.statusText}`);
     return res.json();
   },
 
   async getSensors(): Promise<IoTSensor[]> {
-    const res = await fetch(`${API_BASE}/sensors`);
+    const res = await fetch(`${API_BASE}/sensors`, { headers: getAuthHeaders() });
     if (!res.ok) throw new Error(`Failed to fetch sensors: ${res.statusText}`);
     return res.json();
   },
 
   async getMetrics(): Promise<UrbanRiskMetrics> {
-    const res = await fetch(`${API_BASE}/analytics/metrics`);
+    const res = await fetch(`${API_BASE}/analytics/metrics`, { headers: getAuthHeaders() });
     if (!res.ok) throw new Error(`Failed to fetch risk metrics: ${res.statusText}`);
     return res.json();
   },
 
   // Green Corridor & Hospitals
   async getHospitals(): Promise<Hospital[]> {
-    const res = await fetch(`${API_BASE}/hospitals`);
+    const res = await fetch(`${API_BASE}/hospitals`, { headers: getAuthHeaders() });
     if (!res.ok) throw new Error(`Failed to fetch hospitals: ${res.statusText}`);
     return res.json();
   },
 
   async getTrafficSignals(): Promise<TrafficSignal[]> {
-    const res = await fetch(`${API_BASE}/traffic-signals`);
+    const res = await fetch(`${API_BASE}/traffic-signals`, { headers: getAuthHeaders() });
     if (!res.ok) throw new Error(`Failed to fetch traffic signals: ${res.statusText}`);
     return res.json();
   },
@@ -125,7 +173,7 @@ export const api = {
   async startGreenCorridor(payload: GreenCorridorTransitRequest): Promise<GreenCorridorTransitSession> {
     const res = await fetch(`${API_BASE}/ambulance/transit/start`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(payload)
     });
     if (!res.ok) throw new Error(`Failed to start Green Corridor: ${res.statusText}`);
@@ -133,7 +181,9 @@ export const api = {
   },
 
   async getActiveCorridor(ambulanceId: string): Promise<GreenCorridorTransitSession> {
-    const res = await fetch(`${API_BASE}/ambulance/corridor/${ambulanceId}`);
+    const res = await fetch(`${API_BASE}/ambulance/corridor/${ambulanceId}`, {
+      headers: getAuthHeaders()
+    });
     if (!res.ok) throw new Error(`Failed to get corridor for ${ambulanceId}`);
     return res.json();
   },
@@ -141,11 +191,26 @@ export const api = {
   async reportAccidentSnap(payload: CitizenSnapReport): Promise<AutoScrambleResult> {
     const res = await fetch(`${API_BASE}/citizen-snap-sos`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(payload)
     });
     if (!res.ok) throw new Error(`Failed to report accident: ${res.statusText}`);
     return res.json();
+  },
+
+  async govLogin(payload: GovLoginPayload): Promise<GovLoginResponse> {
+    const res = await fetch(`${API_BASE}/auth/gov-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`Government login failed: ${res.statusText}`);
+    const data: GovLoginResponse = await res.json();
+    if (data.access_token) {
+      localStorage.setItem('rescuenlink_gov_token', data.access_token);
+      localStorage.setItem('rescuenlink_gov_user', JSON.stringify(data.user));
+    }
+    return data;
   }
 };
 
@@ -187,7 +252,7 @@ export class RealtimeClient {
         console.warn('[WebSocket] error', err);
         this.ws?.close();
       };
-    } catch (e) {
+    } catch {
       this.scheduleReconnect();
     }
   }

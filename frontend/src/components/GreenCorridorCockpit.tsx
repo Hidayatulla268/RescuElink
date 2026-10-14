@@ -42,12 +42,28 @@ export const GreenCorridorCockpit: React.FC<GreenCorridorCockpitProps> = ({
   const selectedHospital = hospitals.find(h => h.id === selectedHospitalId);
   const selectedAmbulance = units.find(u => u.id === selectedAmbulanceId);
 
+  const playAudioAlert = (message: string) => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.rate = 1.05;
+        utterance.pitch = 1.0;
+        window.speechSynthesis.speak(utterance);
+      } catch {
+        // Fallback gracefully
+      }
+    }
+  };
+
   // Simulation timer to move ambulance closer and demonstrate the < 1.0 km green signal trigger!
   useEffect(() => {
     if (!activeSession) return;
     const timer = setInterval(() => {
       setSimulatedDistanceKm(prev => {
         const next = Math.max(0.1, Number((prev - 0.25).toFixed(2)));
+        if (prev > 1.0 && next <= 1.0) {
+          playAudioAlert("Approaching junction within 1 kilometer. Traffic signal switched to 100 percent emergency green.");
+        }
         return next;
       });
     }, 3000);
@@ -66,6 +82,7 @@ export const GreenCorridorCockpit: React.FC<GreenCorridorCockpitProps> = ({
       });
       setActiveSession(session);
       setSimulatedDistanceKm(2.4);
+      playAudioAlert(`Green Corridor activated for ${selectedHospital?.name || 'Trauma Hospital'}. Traffic signals on route pre-empted to green.`);
       if (onCorridorActivated) onCorridorActivated(session);
     } catch (err) {
       alert(`Activation failed: ${err}`);

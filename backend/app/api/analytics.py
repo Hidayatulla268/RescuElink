@@ -1,13 +1,19 @@
-from typing import Dict, Any
-from fastapi import APIRouter
+from typing import Dict, Any, List
+from fastapi import APIRouter, Response
 from app.models.schemas import UrbanRiskMetrics, PriorityLevel, IncidentStatus, UnitStatus, SensorAlertStatus
 from app.services.mock_db import db
 
 router = APIRouter()
 
 @router.get("/analytics/metrics", response_model=UrbanRiskMetrics)
-async def get_urban_risk_metrics():
-    """Calculates live urban resilience indicators and predictive threat matrix."""
+async def get_urban_risk_metrics(response: Response):
+    """
+    Calculates live urban resilience indicators, predictive threat matrix,
+    and fleet availability metrics across the Bengaluru Urban Transit Corridor.
+    """
+    # Cache analytics for 5 seconds to reduce computation overhead
+    response.headers["Cache-Control"] = "public, max-age=5, stale-while-revalidate=10"
+    
     active_incidents = [
         inc for inc in db.incidents.values()
         if inc.status not in [IncidentStatus.RESOLVED, IncidentStatus.CANCELLED]
@@ -18,7 +24,7 @@ async def get_urban_risk_metrics():
 
     # Average active ETA
     etas = [u.eta_minutes for u in db.units.values() if u.eta_minutes and u.eta_minutes > 0]
-    avg_eta = round(sum(etas) / len(etas), 1) if etas else 4.5
+    avg_eta = round(sum(etas) / len(etas), 1) if etas else 4.2
 
     # City resilience score (0-100)
     # Deduct points for active P1s, critical sensors, and depleted units
@@ -27,38 +33,39 @@ async def get_urban_risk_metrics():
         resilience -= 15.0
     resilience = max(min(round(resilience, 1), 99.0), 30.0)
 
+    # Bengaluru Metropolitan Emergency Zones
     high_risk_zones = [
         {
-            "zone_id": "ZONE-4-SOUTH-BAY",
-            "name": "Mission Creek Maritime & Chemical Corridor",
-            "threat_level": "CRITICAL",
-            "active_hazards": ["Chemical Storage Blaze", "Flood Basin Overflow (2.4m)"],
-            "vulnerability_index": 92.4,
-            "population_density": "High (Commercial/Industrial)"
+            "zone_id": "ZONE-1-SILK-BOARD",
+            "name": "Central Silk Board & Hosur Road Express Junction",
+            "threat_level": "CRITICAL" if p1_count > 0 else "ELEVATED",
+            "active_hazards": ["Chemical Storage Incident", "Flyover Junction Congestion (92%)"],
+            "vulnerability_index": 88.6,
+            "population_density": "Very High (Transit Hub)"
         },
         {
-            "zone_id": "ZONE-1-FINANCIAL",
-            "name": "Financial Core & Transit Subterranean",
+            "zone_id": "ZONE-2-KORAMANGALA",
+            "name": "Koramangala 80ft Road & Sony World Junction",
             "threat_level": "ELEVATED",
-            "active_hazards": ["Underpass Inundation", "Traffic Gridlock (89%)"],
-            "vulnerability_index": 76.8,
-            "population_density": "Very High (Commuter Arterial)"
+            "active_hazards": ["Underpass Inundation (1.6m)", "Traffic Divert Active"],
+            "vulnerability_index": 74.2,
+            "population_density": "High (Commercial & Residential)"
         },
         {
-            "zone_id": "ZONE-7-WEST-HILLS",
-            "name": "Western Residential Foothills",
+            "zone_id": "ZONE-3-INDIRANAGAR",
+            "name": "Indiranagar 100ft Road & CMH Corridor",
             "threat_level": "STABLE",
-            "active_hazards": ["None Active"],
-            "vulnerability_index": 18.2,
-            "population_density": "Moderate (Residential)"
+            "active_hazards": ["None Active - Green Corridor Clear"],
+            "vulnerability_index": 21.5,
+            "population_density": "Moderate (Retail & Arterial)"
         }
     ]
 
     timeline = [
-        {"time": "10:00", "incident_count": 1, "avg_response_min": 5.2},
-        {"time": "10:15", "incident_count": 2, "avg_response_min": 4.8},
-        {"time": "10:30", "incident_count": 4, "avg_response_min": 4.1},
-        {"time": "10:45", "incident_count": len(active_incidents), "avg_response_min": avg_eta},
+        {"time": "13:30", "incident_count": 1, "avg_response_min": 4.5},
+        {"time": "13:45", "incident_count": 2, "avg_response_min": 4.0},
+        {"time": "14:00", "incident_count": 3, "avg_response_min": 3.6},
+        {"time": "14:15", "incident_count": len(active_incidents), "avg_response_min": avg_eta},
     ]
 
     return UrbanRiskMetrics(
