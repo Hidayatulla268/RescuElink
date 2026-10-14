@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   ShieldAlert, Activity, Cpu, Bell, Volume2, VolumeX, 
   PlusCircle, Radio, Clock, MapPin, Zap, Camera, Monitor, Smartphone, 
-  ShieldCheck, LogIn, UserCheck 
+  ShieldCheck, LogIn, UserCheck, Home, ArrowLeft
 } from 'lucide-react';
 import { GovernmentUser, ViewMode } from '../types';
 
@@ -12,7 +12,9 @@ interface NavbarProps {
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
   governmentUser: GovernmentUser | null;
+  isGovView: boolean;
   onOpenGovLogin: () => void;
+  onSwitchToCitizenView: () => void;
   onOpenNewIncident: () => void;
   onOpenSnapAccident: () => void;
   activeP1Count: number;
@@ -25,7 +27,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   viewMode,
   setViewMode,
   governmentUser,
+  isGovView,
   onOpenGovLogin,
+  onSwitchToCitizenView,
   onOpenNewIncident,
   onOpenSnapAccident,
   activeP1Count,
@@ -45,7 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 bg-slate-950/70 backdrop-blur-2xl border-b border-white/10 px-4 py-2.5 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+    <header className="sticky top-0 z-40 bg-slate-950/75 backdrop-blur-2xl border-b border-white/10 px-4 py-2.5 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
       <div className="max-w-[1920px] mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
         
         {/* Brand & System Status */}
@@ -64,11 +68,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                   RescuE<span className="text-cyan-400">LINK</span>
                 </h1>
                 <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
-                  AI v2.0
+                  {isGovView ? 'Gov Command' : 'Citizen Web'}
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 font-mono flex items-center gap-1.5">
-                <span>Autonomous Urban Command</span>
+                <span>{isGovView ? 'Authorized First Responder Hub' : 'Public Emergency Response Network'}</span>
                 <span className="text-slate-600">•</span>
                 <span className="text-emerald-400 flex items-center gap-1 font-bold">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -87,10 +91,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 shadow-neon-blue font-bold'
                   : 'text-slate-400 hover:text-white'
               }`}
-              title="Desktop Command Center Form"
+              title="Desktop Web Form"
             >
               <Monitor className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Web Console</span>
+              <span className="hidden sm:inline">Web Form</span>
             </button>
             <button
               onClick={() => setViewMode('mobile')}
@@ -107,8 +111,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Navigation Tabs (Available in Web View) */}
-        {viewMode === 'web' && (
+        {/* Navigation Tabs (Shown when in Government / Operator Mode) */}
+        {viewMode === 'web' && isGovView && (
           <nav className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10 text-xs font-mono backdrop-blur-md">
             <button
               onClick={() => setActiveTab('command')}
@@ -168,9 +172,21 @@ export const Navbar: React.FC<NavbarProps> = ({
           </nav>
         )}
 
-        {/* Right Actions: Gov Login, Citizen SOS, Sound Toggle */}
+        {/* Right Actions: Gov Access / Return to Citizen, Citizen SOS, Sound Toggle */}
         <div className="flex items-center gap-2.5 w-full md:w-auto justify-end">
           
+          {/* If in Government view: button to return to public citizen view */}
+          {isGovView && (
+            <button
+              onClick={onSwitchToCitizenView}
+              className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-slate-200 hover:text-white font-mono text-xs flex items-center gap-1.5 transition active:scale-95"
+              title="Return to Clean Citizen Public Webpage"
+            >
+              <Home className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="hidden sm:inline">Public Citizen View</span>
+            </button>
+          )}
+
           {/* Government Login / Status Button */}
           {governmentUser ? (
             <button
@@ -192,7 +208,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <ShieldCheck className="w-4 h-4 text-cyan-400" />
               <span className="hidden sm:inline">Gov Login</span>
               <span className="text-[10px] text-amber-300 font-bold px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/30">
-                Optional
+                Sample Logins Ready
               </span>
             </button>
           )}
@@ -216,7 +232,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-mono text-xs font-bold flex items-center gap-1.5 shadow-neon-amber transition transform active:scale-95 animate-pulse"
           >
             <Camera className="w-4 h-4" />
-            <span className="hidden sm:inline">📸 SNAP ACCIDENT SOS</span>
+            <span className="hidden sm:inline">📸 SNAP SOS</span>
             <span className="sm:hidden">📸 SOS</span>
           </button>
 
@@ -226,7 +242,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-500 hover:to-red-400 text-white font-mono text-xs font-bold flex items-center gap-1.5 shadow-neon-red transition transform active:scale-95"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>+ 911 CALL</span>
+            <span>+ 911</span>
           </button>
         </div>
 

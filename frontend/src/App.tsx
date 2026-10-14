@@ -12,6 +12,7 @@ import { GreenCorridorCockpit } from './components/GreenCorridorCockpit';
 import { CitizenSnapModal } from './components/CitizenSnapModal';
 import { GovernmentLoginModal } from './components/GovernmentLoginModal';
 import { MobileAppView } from './components/MobileAppView';
+import { CitizenPublicView } from './components/CitizenPublicView';
 import { 
   Incident, ResponderUnit, IoTSensor, Hospital, TrafficSignal, 
   GreenCorridorTransitSession, AutoScrambleResult, GovernmentUser, ViewMode 
@@ -21,6 +22,7 @@ import { api, RealtimeClient } from './services/api';
 export const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('web');
   const [governmentUser, setGovernmentUser] = useState<GovernmentUser | null>(null);
+  const [operatorPreview, setOperatorPreview] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'command' | 'map' | 'corridor' | 'sensors' | 'analytics'>('command');
   
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -158,8 +160,20 @@ export const App: React.FC = () => {
     }));
   };
 
+  const handleLoginUser = (user: GovernmentUser) => {
+    setGovernmentUser(user);
+    setOperatorPreview(false);
+    // If ambulance driver logged in, switch them to the Corridor cockpit
+    if (user.role === 'AMBULANCE_DRIVER') {
+      setActiveTab('corridor');
+    } else {
+      setActiveTab('command');
+    }
+  };
+
   const activeP1Count = incidents.filter(i => i.priority === 'P1' && i.status !== 'RESOLVED').length;
   const totalActiveCount = incidents.filter(i => i.status !== 'RESOLVED').length;
+  const isGovView = governmentUser !== null || operatorPreview === true;
 
   return (
     <div className="min-h-screen bg-[#080C14] flex flex-col tactical-grid select-none">
@@ -170,14 +184,19 @@ export const App: React.FC = () => {
         viewMode={viewMode}
         setViewMode={setViewMode}
         governmentUser={governmentUser}
+        isGovView={isGovView}
         onOpenGovLogin={() => setIsGovLoginOpen(true)}
+        onSwitchToCitizenView={() => {
+          setOperatorPreview(false);
+          setGovernmentUser(null);
+        }}
         onOpenNewIncident={() => setIsNewIncidentOpen(true)}
         onOpenSnapAccident={() => setIsSnapModalOpen(true)}
         activeP1Count={activeP1Count}
         totalActiveCount={totalActiveCount}
       />
 
-      {/* Main View: Dual-Form (Desktop Web Console vs Mobile App) */}
+      {/* Main View: Dual-Form (Desktop Web vs Mobile App) */}
       {viewMode === 'mobile' ? (
         <MobileAppView
           incidents={incidents}
@@ -197,10 +216,49 @@ export const App: React.FC = () => {
             loadData();
           }}
         />
+      ) : !isGovView ? (
+        /* Clean Citizen Public Webpage (No complex operator clutter) */
+        <CitizenPublicView
+          incidents={incidents}
+          hospitals={hospitals}
+          trafficSignals={trafficSignals}
+          activeCorridor={activeCorridor}
+          onOpenNewIncident={() => setIsNewIncidentOpen(true)}
+          onOpenSnapAccident={() => setIsSnapModalOpen(true)}
+          onOpenGovLogin={() => setIsGovLoginOpen(true)}
+          onOpenCorridorTab={() => {
+            setOperatorPreview(true);
+            setActiveTab('corridor');
+          }}
+          onLoginAsSample={handleLoginUser}
+          onSwitchToOperatorView={() => setOperatorPreview(true)}
+        />
       ) : (
+        /* Authorized Government & Emergency Responder Console */
         <main className="flex-1 flex flex-col p-3 sm:p-4 max-w-[1920px] w-full mx-auto overflow-hidden">
+          {/* Government Mode Status Banner */}
+          <div className="mb-3 px-4 py-2.5 rounded-2xl glass-card-ultra border border-emerald-500/30 flex items-center justify-between text-xs font-mono">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-neon-green" />
+              <span className="text-white font-bold">
+                {governmentUser 
+                  ? `Authorized Personnel: ${governmentUser.fullName} (${governmentUser.badgeNumber}) — ${governmentUser.roleTitle}`
+                  : 'Operator Console Preview Mode (Demo View)'}
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                setOperatorPreview(false);
+                setGovernmentUser(null);
+              }}
+              className="text-[11px] px-3 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-cyan-300 border border-white/15 transition"
+            >
+              Return to Citizen Public Webpage
+            </button>
+          </div>
+
           {activeTab === 'command' && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 h-[calc(100vh-84px)]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 h-[calc(100vh-130px)]">
               {/* Left Column: Live Incident Feed (4 cols) */}
               <div className="lg:col-span-4 h-full flex flex-col">
                 <IncidentFeed
@@ -259,7 +317,7 @@ export const App: React.FC = () => {
           )}
 
           {activeTab === 'map' && (
-            <div className="flex-1 h-[calc(100vh-84px)] flex flex-col">
+            <div className="flex-1 h-[calc(100vh-130px)] flex flex-col">
               <IncidentMap
                 incidents={incidents}
                 units={units}
@@ -274,7 +332,7 @@ export const App: React.FC = () => {
           )}
 
           {activeTab === 'sensors' && (
-            <div className="flex-1 h-[calc(100vh-84px)]">
+            <div className="flex-1 h-[calc(100vh-130px)]">
               <SensorMonitor
                 sensors={sensors}
                 onInjectSpike={handleInjectSpike}
@@ -290,7 +348,7 @@ export const App: React.FC = () => {
         </main>
       )}
 
-      {/* Modals — Fully accessible across both Web Console and Mobile App */}
+      {/* Modals — Fully accessible across all modes */}
       <IncidentDetailModal
         incident={inspectingIncident}
         onClose={() => setInspectingIncident(null)}
@@ -312,6 +370,7 @@ export const App: React.FC = () => {
         onAutoScrambled={handleAutoScrambled}
         onOpenGreenCorridor={() => {
           setIsSnapModalOpen(false);
+          setOperatorPreview(true);
           setActiveTab('corridor');
         }}
       />
@@ -326,8 +385,11 @@ export const App: React.FC = () => {
         isOpen={isGovLoginOpen}
         onClose={() => setIsGovLoginOpen(false)}
         currentUser={governmentUser}
-        onLogin={(u) => setGovernmentUser(u)}
-        onLogout={() => setGovernmentUser(null)}
+        onLogin={handleLoginUser}
+        onLogout={() => {
+          setGovernmentUser(null);
+          setOperatorPreview(false);
+        }}
       />
     </div>
   );
