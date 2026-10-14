@@ -48,10 +48,10 @@ def run_tests():
         # 7. Citizen Snap SOS Accident with Auto-Scramble
         snap_payload = {
             "image_base64": "data:image/jpeg;base64,roadway_crash_simulated_bytes",
-            "location_address": "Market St & 6th St Intersection",
-            "coordinates": {"lat": 37.7815, "lng": -122.4110},
-            "reporter_name": "Eyewitness Bystander",
-            "optional_notes": "Two vehicles collided violently. One driver pinned, radiator smoking."
+            "location_address": "Silk Board Central Flyover Junction, Hosur Rd & ORR",
+            "coordinates": {"lat": 12.9180, "lng": 77.6240},
+            "reporter_name": "Eyewitness Bystander (Vikram Sharma)",
+            "optional_notes": "Two vehicles collided violently on flyover ramp. One driver pinned, radiator smoking."
         }
         res = client.post("/api/v1/citizen-snap-sos", json=snap_payload)
         assert res.status_code == 200, f"Snap SOS failed: {res.text}"
@@ -64,8 +64,8 @@ def run_tests():
         corridor_payload = {
             "ambulance_id": amb_id,
             "destination_hospital_id": hosp_id,
-            "pickup_address": "Market St & 6th St Intersection",
-            "pickup_coordinates": {"lat": 37.7815, "lng": -122.4110},
+            "pickup_address": "Silk Board Central Flyover Junction, Hosur Rd & ORR",
+            "pickup_coordinates": {"lat": 12.9180, "lng": 77.6240},
             "patient_condition": "Severe Traumatic Brain Injury"
         }
         res = client.post("/api/v1/ambulance/transit/start", json=corridor_payload)

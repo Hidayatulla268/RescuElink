@@ -20,7 +20,7 @@ export const CitizenBroadcastModal: React.FC<CitizenBroadcastModalProps> = ({
   if (!isOpen || !incident) return null;
 
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([
-    'English', 'Spanish', 'Hindi', 'French'
+    'Hindi', 'English', 'Kannada', 'Tamil'
   ]);
   const [advisoryType, setAdvisoryType] = useState<string>('EVACUATION_OR_SHELTER');
   const [broadcastData, setBroadcastData] = useState<CitizenBroadcastResponse | null>(null);
@@ -28,7 +28,7 @@ export const CitizenBroadcastModal: React.FC<CitizenBroadcastModalProps> = ({
   const [transmitted, setTransmitted] = useState<boolean>(false);
   const [copiedLang, setCopiedLang] = useState<string | null>(null);
 
-  const availableLanguages = ['English', 'Spanish', 'Hindi', 'French', 'Arabic'];
+  const availableLanguages = ['Hindi', 'English', 'Kannada', 'Tamil', 'Telugu', 'Bengali', 'Marathi'];
 
   const toggleLanguage = (lang: string) => {
     setSelectedLanguages(prev =>

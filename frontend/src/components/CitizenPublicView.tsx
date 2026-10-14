@@ -39,29 +39,51 @@ export const CitizenPublicView: React.FC<CitizenPublicViewProps> = ({
   return (
     <div className="flex-1 flex flex-col space-y-6 overflow-y-auto px-4 py-4 max-w-[1700px] w-full mx-auto">
       
+      {/* Indian National Emergency Numbers Helpline Bar */}
+      <div className="rounded-2xl glass-card-ultra px-4 py-2.5 border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-blue-500/10 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+        <div className="flex items-center gap-2">
+          <span className="text-base">🇮🇳</span>
+          <span className="font-bold text-white tracking-wider">ALL-INDIA EMERGENCY HELPLINE INTEGRATION:</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-4 text-xs">
+          <span className="px-2.5 py-1 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold">
+            📞 112 Unified Emergency
+          </span>
+          <span className="px-2.5 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">
+            🚑 108 Ambulance / EMS
+          </span>
+          <span className="px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">
+            🚒 101 Fire & SDRF
+          </span>
+          <span className="px-2.5 py-1 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-500/40 font-bold">
+            🚓 100 Police Rapid Action
+          </span>
+        </div>
+      </div>
+
       {/* Citizen Hero Banner */}
       <div className="relative rounded-3xl glass-card-ultra p-6 sm:p-8 border border-white/15 overflow-hidden">
         {/* Subtle background glow */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <div className="flex items-center gap-2">
               <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5 shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                MUNICIPAL EMERGENCY GRID ONLINE
+                INDIA EMERGENCY RESPONSE GRID ONLINE
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-mono text-cyan-300 bg-white/5 border border-white/10">
-                Public Safety Portal
+                Bengaluru Metro Sector
               </span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-mono">
-              RescuE<span className="text-cyan-400">LINK</span> Citizen Safety Network
+              RescuE<span className="text-cyan-400">LINK</span> India Citizen Portal
             </h1>
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Instant AI road accident reporting, automated nearest ambulance scramble, and live Green Corridor route clearance tracking for metropolitan citizens.
+              Instant AI road accident reporting, automated nearest 108 ambulance scramble, and live Green Corridor signal preemption tracking across Bengaluru and Indian metropolitan corridors.
             </p>
           </div>
 
@@ -79,7 +101,7 @@ export const CitizenPublicView: React.FC<CitizenPublicViewProps> = ({
               className="px-5 py-3 rounded-2xl bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-500 hover:to-red-400 text-white font-mono text-xs font-bold flex items-center gap-2 shadow-neon-red transition active:scale-95"
             >
               <Phone className="w-4 h-4" />
-              <span>🚨 CALL 911 / REPORT EMERGENCY</span>
+              <span>🚨 DIAL 112 / REPORT EMERGENCY</span>
             </button>
           </div>
         </div>

@@ -115,7 +115,7 @@ export const GovernmentLoginModal: React.FC<GovernmentLoginModalProps> = ({
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                Authorized Login for Ambulance Drivers, Fire, Police, Hospitals & 911 Dispatch
+                Authorized Login for 108 Ambulance Pilots, Fire 101, Police 100, Hospitals & 112 Dispatch
               </p>
             </div>
           </div>

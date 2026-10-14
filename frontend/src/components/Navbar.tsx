@@ -41,7 +41,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   useEffect(() => {
     const update = () => {
       const now = new Date();
-      setCurrentTime(now.toLocaleTimeString('en-US', { hour12: false }) + ' UTC');
+      setCurrentTime(now.toLocaleTimeString('en-IN', { hour12: false }) + ' IST');
     };
     update();
     const timer = setInterval(update, 1000);
@@ -55,24 +55,27 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Brand & System Status */}
         <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
           <div className="flex items-center gap-2.5">
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/30 border border-cyan-400/40 shadow-neon-blue">
-              <ShieldAlert className="w-6 h-6 text-cyan-400" />
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500/20 via-white/10 to-emerald-500/20 border border-amber-400/40 shadow-neon-blue">
+              <ShieldAlert className="w-6 h-6 text-amber-400" />
               <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
               </span>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold tracking-wider text-white uppercase font-mono">
-                  RescuE<span className="text-cyan-400">LINK</span>
+                <h1 className="text-lg font-bold tracking-wider text-white uppercase font-mono flex items-center gap-1.5">
+                  <span>RescuE<span className="text-cyan-400">LINK</span></span>
+                  <span className="text-xs px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-400/40 text-amber-300 font-bold">
+                    INDIA 🇮🇳
+                  </span>
                 </h1>
                 <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
                   {isGovView ? 'Gov Command' : 'Citizen Web'}
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 font-mono flex items-center gap-1.5">
-                <span>{isGovView ? 'Authorized First Responder Hub' : 'Public Emergency Response Network'}</span>
+                <span>{isGovView ? '112 / 108 Emergency Grid' : 'Citizen Safety & Green Corridors'}</span>
                 <span className="text-slate-600">•</span>
                 <span className="text-emerald-400 flex items-center gap-1 font-bold">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -236,13 +239,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="sm:hidden">📸 SOS</span>
           </button>
 
-          {/* Citizen 911 Report */}
+          {/* Citizen 112 / 108 Emergency Report */}
           <button
             onClick={onOpenNewIncident}
             className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-500 hover:to-red-400 text-white font-mono text-xs font-bold flex items-center gap-1.5 shadow-neon-red transition transform active:scale-95"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>+ 911</span>
+            <span>+ 112 / 108</span>
           </button>
         </div>
 

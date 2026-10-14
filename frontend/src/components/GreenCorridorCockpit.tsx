@@ -29,7 +29,7 @@ export const GreenCorridorCockpit: React.FC<GreenCorridorCockpitProps> = ({
     hospitals[0]?.id || 'hosp-01'
   );
   const [pickupAddress, setPickupAddress] = useState<string>(
-    'Market St & 8th St, Downtown Intersection'
+    'Silk Board Central Flyover Junction, Hosur Rd & ORR'
   );
   const [patientCondition, setPatientCondition] = useState<string>(
     'Acute Polytrauma / Traumatic Brain Injury with Hemodynamic Instability'
@@ -61,7 +61,7 @@ export const GreenCorridorCockpit: React.FC<GreenCorridorCockpitProps> = ({
         ambulance_id: selectedAmbulanceId,
         destination_hospital_id: selectedHospitalId,
         pickup_address: pickupAddress,
-        pickup_coordinates: { lat: 37.7788, lng: -122.4150 },
+        pickup_coordinates: { lat: 12.9180, lng: 77.6240 },
         patient_condition: patientCondition
       });
       setActiveSession(session);

@@ -19,84 +19,84 @@ class Database:
         self._seed_initial_data()
 
     def _seed_initial_data(self):
-        # 1. Seed Responder Units
+        # 1. Seed Indian Responder Units (108 Ambulances, Karnataka Fire 101, Traffic Police 100)
         initial_units = [
             ResponderUnit(
                 id="unit-ems-101",
-                callsign="MEDIC-101",
+                callsign="108-ALS-AMBULANCE (Pilot Rajesh)",
                 type=UnitType.AMBULANCE_PARAMEDIC,
                 status=UnitStatus.IDLE,
-                location=Coordinates(lat=37.7749, lng=-122.4194),
+                location=Coordinates(lat=12.9380, lng=77.6210),
                 speed_kmh=0.0,
-                battery_or_fuel_pct=94,
+                battery_or_fuel_pct=95,
                 personnel_count=2
             ),
             ResponderUnit(
                 id="unit-ems-104",
-                callsign="MEDIC-104 (Trauma)",
+                callsign="108-TRAUMA-CRITICAL (Pilot Suresh)",
                 type=UnitType.AMBULANCE_PARAMEDIC,
                 status=UnitStatus.IDLE,
-                location=Coordinates(lat=37.7833, lng=-122.4167),
+                location=Coordinates(lat=12.9250, lng=77.6180),
                 speed_kmh=0.0,
-                battery_or_fuel_pct=88,
+                battery_or_fuel_pct=92,
                 personnel_count=3
             ),
             ResponderUnit(
                 id="unit-fire-201",
-                callsign="ENGINE-201 (Ladder)",
+                callsign="FIRE-101-LADDER (Karnataka Fire)",
                 type=UnitType.FIRE_ENGINE,
                 status=UnitStatus.IDLE,
-                location=Coordinates(lat=37.7699, lng=-122.4469),
+                location=Coordinates(lat=12.9660, lng=77.5850),
                 speed_kmh=0.0,
                 battery_or_fuel_pct=91,
                 personnel_count=4
             ),
             ResponderUnit(
                 id="unit-fire-205",
-                callsign="HAZMAT-205",
+                callsign="SDRF-HAZMAT-101 (State Disaster Response)",
                 type=UnitType.FIRE_ENGINE,
                 status=UnitStatus.IDLE,
-                location=Coordinates(lat=37.7550, lng=-122.4180),
+                location=Coordinates(lat=12.9420, lng=77.6880),
                 speed_kmh=0.0,
                 battery_or_fuel_pct=96,
                 personnel_count=4
             ),
             ResponderUnit(
                 id="unit-drone-301",
-                callsign="SKYSCAN-ALPHA (Drone)",
+                callsign="GARUDA-ALPHA-RECON (ISRO SkyScan)",
                 type=UnitType.DRONE_AERIAL_RECON,
                 status=UnitStatus.IDLE,
-                location=Coordinates(lat=37.7785, lng=-122.4056),
+                location=Coordinates(lat=12.9760, lng=77.5930),
                 speed_kmh=0.0,
                 battery_or_fuel_pct=99,
                 personnel_count=1
             ),
             ResponderUnit(
                 id="unit-drone-302",
-                callsign="SKYSCAN-BRAVO (Thermal)",
+                callsign="GARUDA-BRAVO-THERMAL (Night Recon)",
                 type=UnitType.DRONE_AERIAL_RECON,
                 status=UnitStatus.IDLE,
-                location=Coordinates(lat=37.7610, lng=-122.4350),
+                location=Coordinates(lat=12.9190, lng=77.6280),
                 speed_kmh=0.0,
-                battery_or_fuel_pct=85,
+                battery_or_fuel_pct=88,
                 personnel_count=1
             ),
             ResponderUnit(
                 id="unit-rescue-401",
-                callsign="HEAVY-RESCUE-401",
+                callsign="NDRF-HEAVY-RESCUE-801 (Urban Search)",
                 type=UnitType.HEAVY_RESCUE,
                 status=UnitStatus.IDLE,
-                location=Coordinates(lat=37.7880, lng=-122.4075),
+                location=Coordinates(lat=12.9520, lng=77.6530),
                 speed_kmh=0.0,
-                battery_or_fuel_pct=82,
+                battery_or_fuel_pct=85,
                 personnel_count=5
             ),
             ResponderUnit(
                 id="unit-tac-501",
-                callsign="PATROL-501 (Rapid Response)",
+                callsign="TRAFFIC-POLICE-100 (BTP Flying Squad)",
                 type=UnitType.POLICE_TACTICAL,
                 status=UnitStatus.IDLE,
-                location=Coordinates(lat=37.7712, lng=-122.4110),
+                location=Coordinates(lat=12.9710, lng=77.6040),
                 speed_kmh=0.0,
                 battery_or_fuel_pct=90,
                 personnel_count=2
@@ -105,14 +105,14 @@ class Database:
         for u in initial_units:
             self.units[u.id] = u
 
-        # 2. Seed Smart City IoT Sensors
+        # 2. Seed Indian Smart City IoT Sensors (Bengaluru Urban Sensor Grid)
         now_iso = datetime.now(timezone.utc).isoformat()
         initial_sensors = [
             IoTSensor(
                 id="sensor-f-01",
-                name="Mission Creek Flood Basin Gauge",
+                name="Bellandur Lake Spillway Water Gauge",
                 type=SensorType.FLOOD_DEPTH,
-                location=Coordinates(lat=37.7715, lng=-122.3980),
+                location=Coordinates(lat=12.9370, lng=77.6740),
                 value=2.4,
                 unit="meters",
                 threshold=2.0,
@@ -121,21 +121,21 @@ class Database:
             ),
             IoTSensor(
                 id="sensor-f-02",
-                name="Market St Storm Runoff Sensor",
+                name="Silk Board Storm Drain Sump Level",
                 type=SensorType.FLOOD_DEPTH,
-                location=Coordinates(lat=37.7810, lng=-122.4115),
-                value=0.6,
+                location=Coordinates(lat=12.9160, lng=77.6250),
+                value=0.7,
                 unit="meters",
-                threshold=1.2,
+                threshold=1.5,
                 status=SensorAlertStatus.NORMAL,
                 last_updated=now_iso
             ),
             IoTSensor(
                 id="sensor-aq-01",
-                name="Industrial Waterfront Air Sentinel",
+                name="Peenya Industrial Corridor Air Sentinel",
                 type=SensorType.AIR_QUALITY_AQI,
-                location=Coordinates(lat=37.7530, lng=-122.3880),
-                value=168.0,
+                location=Coordinates(lat=13.0280, lng=77.5320),
+                value=176.0,
                 unit="AQI (Unhealthy)",
                 threshold=100.0,
                 status=SensorAlertStatus.WARNING,
@@ -143,10 +143,10 @@ class Database:
             ),
             IoTSensor(
                 id="sensor-th-01",
-                name="Substation 4 Thermal Grid",
+                name="Whitefield Substation Thermal Sentinel",
                 type=SensorType.THERMAL_HEAT,
-                location=Coordinates(lat=37.7845, lng=-122.4010),
-                value=68.5,
+                location=Coordinates(lat=12.9720, lng=77.7150),
+                value=71.5,
                 unit="°C",
                 threshold=60.0,
                 status=SensorAlertStatus.CRITICAL,
@@ -154,10 +154,10 @@ class Database:
             ),
             IoTSensor(
                 id="sensor-tr-01",
-                name="Bay Bridge Arterial Flow Node",
+                name="Outer Ring Road Marathahalli Arterial Congestion",
                 type=SensorType.TRAFFIC_CONGESTION,
-                location=Coordinates(lat=37.7895, lng=-122.3890),
-                value=89.0,
+                location=Coordinates(lat=12.9580, lng=77.6980),
+                value=92.0,
                 unit="% Congestion",
                 threshold=75.0,
                 status=SensorAlertStatus.WARNING,
@@ -165,10 +165,10 @@ class Database:
             ),
             IoTSensor(
                 id="sensor-se-01",
-                name="Financial District Fault Seismograph",
+                name="MG Road Metro Seismic Tremor Station",
                 type=SensorType.SEISMIC_TREMOR,
-                location=Coordinates(lat=37.7930, lng=-122.4005),
-                value=1.8,
+                location=Coordinates(lat=12.9750, lng=77.6080),
+                value=1.5,
                 unit="Richter (Micro)",
                 threshold=3.5,
                 status=SensorAlertStatus.NORMAL,
@@ -178,33 +178,33 @@ class Database:
         for s in initial_sensors:
             self.sensors[s.id] = s
 
-        # 3. Seed Realistic Incidents
+        # 3. Seed Realistic Indian Emergency Incidents
         initial_incidents = [
             Incident(
-                id="inc-911-001",
-                title="Industrial Complex Chemical Storage Fire",
-                caller_name="Marcus Vance (Plant Safety Officer)",
-                caller_phone="+1 (415) 555-0192",
-                raw_description="Dense toxic chemical smoke and active blaze erupting from warehouse sector B. Stored solvents caught fire. Two staff unaccounted for. Adjacent electrical substation threatened.",
-                location_address="1420 3rd St, Central Industrial Pier, Sector 4",
-                coordinates=Coordinates(lat=37.7710, lng=-122.3920),
+                id="inc-112-001",
+                title="Outer Ring Road Silk Board Chemical Tanker Blaze",
+                caller_name="Inspector Ramesh Kumar (Bengaluru Traffic Police)",
+                caller_phone="+91 98450 11201",
+                raw_description="Solvent chemical tanker overturned and caught fire on Silk Board flyover ramp. Heavy toxic plume drifting toward residential apartments. Two drivers trapped, electrical line down.",
+                location_address="Silk Board Central Flyover Ramp, Hosur Rd & ORR",
+                coordinates=Coordinates(lat=12.9180, lng=77.6240),
                 status=IncidentStatus.REPORTED,
                 priority=PriorityLevel.P1,
                 category=IncidentCategory.HAZMAT_SPILL,
                 triage=AITriageResult(
-                    severity_score=94,
+                    severity_score=95,
                     priority=PriorityLevel.P1,
                     category=IncidentCategory.HAZMAT_SPILL,
                     estimated_victims=2,
-                    detected_hazards=["Toxic Solvent Combustion", "Substation Flashover Risk", "Thermal Plume Downwind"],
+                    detected_hazards=["Industrial Solvent Combustion", "Flyover Structural Stress", "Toxic Downwind Vapor"],
                     standard_operating_procedures=[
-                        "Establish 500m hot-zone perimeter and upwind command post",
-                        "Deploy HAZMAT Foam suppression unit immediately",
-                        "Launch aerial thermal drone for plume mapping",
-                        "Broadcast urgent shelter-in-place advisory to adjacent sectors"
+                        "Establish 600m perimeter around Silk Board Flyover",
+                        "Deploy SDRF HAZMAT foam foam tender immediately",
+                        "Launch ISRO SkyScan drone for aerial thermal mapping",
+                        "Broadcast urgent shelter-in-place advisory across Koramangala & BTM"
                     ],
-                    recommended_units=["HAZMAT-205", "ENGINE-201 (Ladder)", "SKYSCAN-ALPHA (Drone)", "MEDIC-104 (Trauma)"],
-                    reasoning_summary="High-risk chemical fire with trapped personnel and immediate secondary infrastructure threat. High likelihood of hazardous vapor inhalation.",
+                    recommended_units=["SDRF-HAZMAT-101", "FIRE-101-LADDER", "GARUDA-ALPHA-RECON", "108-TRAUMA-CRITICAL"],
+                    reasoning_summary="High-risk chemical blaze at critical urban highway interchange with trapped personnel and intense toxic smoke.",
                     evacuation_radius_meters=600,
                     confidence_score=0.98
                 ),
@@ -213,30 +213,30 @@ class Database:
                 updated_at=now_iso
             ),
             Incident(
-                id="inc-911-002",
-                title="Subway Underpass Flash Flooding & Trapped Vehicles",
-                caller_name="Elena Rostova (Transit Patrol)",
-                caller_phone="+1 (415) 555-0144",
-                raw_description="Rapid water accumulation in 4th St subterranean underpass exceeding 2 meters depth. Three passenger vehicles stalled with occupants climbing onto car roofs.",
-                location_address="4th St Underpass at Channel Crossing",
-                coordinates=Coordinates(lat=37.7735, lng=-122.3995),
+                id="inc-112-002",
+                title="Bellandur Tech Corridor Underpass Monsoon Water Inundation",
+                caller_name="Pooja Hegde (IT Park Operations)",
+                caller_phone="+91 98801 11202",
+                raw_description="Rapid water accumulation in Outer Ring Road subterranean underpass exceeding 2.2 meters depth. BMTC bus and two cars submerged with occupants on bus roof.",
+                location_address="Bellandur Outer Ring Road Subterranean Underpass",
+                coordinates=Coordinates(lat=12.9360, lng=77.6730),
                 status=IncidentStatus.DISPATCHED,
                 priority=PriorityLevel.P1,
                 category=IncidentCategory.FLOOD_WATER,
                 triage=AITriageResult(
-                    severity_score=88,
+                    severity_score=89,
                     priority=PriorityLevel.P1,
                     category=IncidentCategory.FLOOD_WATER,
-                    estimated_victims=5,
-                    detected_hazards=["Submerged Electrical Conduits", "Hypothermia Risk", "Vehicle Inundation"],
+                    estimated_victims=6,
+                    detected_hazards=["Submerged Electrical Cables", "Fast-Moving Sump Water", "Vehicle Inundation Risk"],
                     standard_operating_procedures=[
-                        "Cut power to underpass drainage pump substation",
-                        "Deploy Swiftwater Rescue inflatables and divers",
-                        "Divert approaching arterial traffic via automated variable messaging",
-                        "Prepare triage area on north embankment"
+                        "Cut power to underpass pumping substation immediately",
+                        "Deploy NDRF inflatable rescue boats and flood divers",
+                        "Divert approaching traffic from Marathahalli flyover",
+                        "Prepare triage area on north service road"
                     ],
-                    recommended_units=["HEAVY-RESCUE-401", "MEDIC-101", "SKYSCAN-BRAVO (Thermal)"],
-                    reasoning_summary="Active life-safety hazard with rising waters trapping multiple motorists in low elevation passage.",
+                    recommended_units=["NDRF-HEAVY-RESCUE-801", "108-ALS-AMBULANCE", "GARUDA-BRAVO-THERMAL"],
+                    reasoning_summary="Active life-safety hazard with rising monsoon water trapping multiple bus commuters in low underpass.",
                     evacuation_radius_meters=350,
                     confidence_score=0.96
                 ),
@@ -245,62 +245,62 @@ class Database:
                 updated_at=now_iso
             ),
             Incident(
-                id="inc-911-003",
-                title="Commercial High-Rise Elevator System Stall with Medical Distress",
-                caller_name="Building Operations Manager",
-                caller_phone="+1 (415) 555-0210",
-                raw_description="Elevator Car 3 stuck between 18th and 19th floors following localized power surge. Elderly passenger reporting acute angina / chest pain.",
-                location_address="555 Mission St, Financial Corridor",
-                coordinates=Coordinates(lat=37.7885, lng=-122.4002),
+                id="inc-112-003",
+                title="Brigade Road High-Rise Metro Complex Elevator Stall & Cardiac Distress",
+                caller_name="Building Operations Manager (Sanjay Verma)",
+                caller_phone="+91 99000 11203",
+                raw_description="Elevator Car stuck between 14th and 15th floors following power surge. Elderly passenger reporting acute angina and chest tightness.",
+                location_address="Brigade Towers, 135 Brigade Rd, Central CBD",
+                coordinates=Coordinates(lat=12.9730, lng=77.6080),
                 status=IncidentStatus.REPORTED,
                 priority=PriorityLevel.P2,
                 category=IncidentCategory.MEDICAL_TRAUMA,
                 triage=AITriageResult(
-                    severity_score=76,
+                    severity_score=78,
                     priority=PriorityLevel.P2,
                     category=IncidentCategory.MEDICAL_TRAUMA,
                     estimated_victims=1,
-                    detected_hazards=["Elevator Shaft Access Restriction", "Cardiac Event Escalation"],
+                    detected_hazards=["Confined Elevator Shaft", "Myocardial Infarction Escalation"],
                     standard_operating_procedures=[
-                        "Dispatch Advanced Life Support (ALS) paramedic crew",
-                        "Coordinate elevator machine room override with building engineer",
-                        "Bring portable defibrillator and extrication harness"
+                        "Dispatch 108 Advanced Life Support (ALS) paramedic crew",
+                        "Coordinate elevator machine room override with BESCOM engineers",
+                        "Carry portable ECG monitor, oxygen and extrication sling"
                     ],
-                    recommended_units=["MEDIC-104 (Trauma)", "PATROL-501 (Rapid Response)"],
-                    reasoning_summary="Urgent medical situation complicated by mechanical entrapment at height. Rapid technical extrication required.",
+                    recommended_units=["108-TRAUMA-CRITICAL", "TRAFFIC-POLICE-100"],
+                    reasoning_summary="Critical medical emergency complicated by mechanical entrapment at height. Rapid technical extrication required.",
                     evacuation_radius_meters=50,
-                    confidence_score=0.92
+                    confidence_score=0.93
                 ),
                 assigned_unit_ids=[],
                 created_at=now_iso,
                 updated_at=now_iso
             ),
             Incident(
-                id="inc-911-004",
-                title="Downtown Multi-Vehicle Collision & Fuel Leakage",
-                caller_name="Citizen Motorist",
-                caller_phone="+1 (415) 555-0378",
-                raw_description="Three vehicles collided at intersection during traffic light outage. One driver dazed, small puddle of gasoline spreading near storm drain.",
-                location_address="Intersection of Market St & 8th St",
-                coordinates=Coordinates(lat=37.7788, lng=-122.4150),
+                id="inc-112-004",
+                title="HAL Old Airport Road Multi-Vehicle Collision & Fuel Leakage",
+                caller_name="Eyewitness Motorist",
+                caller_phone="+91 98440 11204",
+                raw_description="Two cars collided with auto-rickshaw during peak traffic. Auto overturned, driver dazed with bleeding scalp, small fuel spill on road.",
+                location_address="HAL Old Airport Road near Domlur Flyover",
+                coordinates=Coordinates(lat=12.9610, lng=77.6430),
                 status=IncidentStatus.REPORTED,
                 priority=PriorityLevel.P3,
                 category=IncidentCategory.TRAFFIC_COLLISION,
                 triage=AITriageResult(
-                    severity_score=52,
+                    severity_score=54,
                     priority=PriorityLevel.P3,
                     category=IncidentCategory.TRAFFIC_COLLISION,
-                    estimated_victims=1,
-                    detected_hazards=["Roadway Obstruction", "Minor Flammable Fuel Runoff"],
+                    estimated_victims=2,
+                    detected_hazards=["Roadway Obstruction", "Flammable Petrol Runoff"],
                     standard_operating_procedures=[
-                        "Block inbound traffic lanes to protect incident scene",
-                        "Apply absorbent sand to fuel puddle",
-                        "Triage drivers for cervical spine trauma and shock"
+                        "Block inbound traffic lane to shield accident scene",
+                        "Apply absorbent sand to petrol leak",
+                        "Triage auto driver for head trauma and stabilize cervical spine"
                     ],
-                    recommended_units=["PATROL-501 (Rapid Response)", "MEDIC-101"],
-                    reasoning_summary="Moderate collision with localized traffic blockage and minor fuel hazard. Controlled conditions.",
+                    recommended_units=["TRAFFIC-POLICE-100", "108-ALS-AMBULANCE"],
+                    reasoning_summary="Moderate collision causing localized arterial congestion and minor fuel hazard. Under control.",
                     evacuation_radius_meters=100,
-                    confidence_score=0.90
+                    confidence_score=0.91
                 ),
                 assigned_unit_ids=[],
                 created_at=now_iso,
@@ -312,129 +312,137 @@ class Database:
 
         # Update initial assigned unit status
         self.units["unit-rescue-401"].status = UnitStatus.DISPATCHED
-        self.units["unit-rescue-401"].assigned_incident_id = "inc-911-002"
+        self.units["unit-rescue-401"].assigned_incident_id = "inc-112-002"
         self.units["unit-rescue-401"].eta_minutes = 4.2
         self.units["unit-rescue-401"].speed_kmh = 48.0
 
-        # 4. Seed Major Metropolitan Hospitals
+        # 4. Seed Major Indian Metropolitan Hospitals (Bengaluru Trauma Centers)
         initial_hospitals = [
             Hospital(
                 id="hosp-01",
-                name="Zuckerberg Metro General & Trauma Center",
-                address="1001 Potrero Ave, Mission District",
-                coordinates=Coordinates(lat=37.7558, lng=-122.4045),
-                trauma_level="Level 1 Trauma Center",
-                total_beds=450,
-                available_beds=24,
-                icu_capacity=8,
-                phone="+1 (415) 206-8000",
+                name="Apollo Multi-Speciality Trauma & Emergency Center",
+                address="Bannerghatta Rd, Opp IIMB, Bengaluru",
+                coordinates=Coordinates(lat=12.9150, lng=77.5990),
+                trauma_level="Level 1 Multi-Speciality Trauma",
+                total_beds=550,
+                available_beds=32,
+                icu_capacity=18,
+                phone="+91 (80) 2630-4050",
                 trauma_team_status="STANDBY",
-                assigned_trauma_bay="Trauma Bay 1 (Sterile)",
+                assigned_trauma_bay="Trauma Bay 1 (Sterile & Cleared)",
                 er_preparedness_notes=[
                     "Level-1 Emergency Surgical Team on standby",
-                    "Rapid Blood Infuser pre-primed with O-Negative",
-                    "Dedicated CT Scanner cleared for immediate polytrauma scan"
+                    "Rapid Blood Infuser primed with O-Negative",
+                    "Direct cardiac cath-lab & CT bay cleared for immediate polytrauma"
                 ]
             ),
             Hospital(
                 id="hosp-02",
-                name="UCSF Mission Bay Medical Complex",
-                address="1825 4th St, Mission Bay",
-                coordinates=Coordinates(lat=37.7680, lng=-122.3915),
-                trauma_level="Level 1 Comprehensive & Pediatric",
-                total_beds=320,
-                available_beds=38,
-                icu_capacity=14,
-                phone="+1 (415) 353-1000",
+                name="Manipal Comprehensive Hospital & Organ Transplant Center",
+                address="98 HAL Old Airport Road, Kodihalli",
+                coordinates=Coordinates(lat=12.9590, lng=77.6480),
+                trauma_level="Level 1 Comprehensive & Neuro-Trauma",
+                total_beds=450,
+                available_beds=40,
+                icu_capacity=22,
+                phone="+91 (80) 2502-4444",
                 trauma_team_status="STANDBY",
-                assigned_trauma_bay="Pediatric/Adult Bay 3",
+                assigned_trauma_bay="Neuro-Trauma Resuscitation Bay 2",
                 er_preparedness_notes=[
-                    "Pediatric Intensive Care & Burn Care Unit active",
-                    "Neurotrauma surgeon on direct audio link"
+                    "Pediatric & Adult Intensive Care Trauma units fully operational",
+                    "Senior Neurosurgeon and Anaesthetist on direct audio link"
                 ]
             ),
             Hospital(
                 id="hosp-03",
-                name="St. Francis Memorial Emergency Pavilion",
-                address="900 Hyde St, Nob Hill",
-                coordinates=Coordinates(lat=37.7905, lng=-122.4150),
-                trauma_level="Level 2 Emergency Trauma",
-                total_beds=210,
-                available_beds=19,
-                icu_capacity=5,
-                phone="+1 (415) 353-6000",
+                name="Victoria Government Hospital & Emergency Trauma Pavilion",
+                address="Bengaluru Medical College Campus, Fort",
+                coordinates=Coordinates(lat=12.9630, lng=77.5740),
+                trauma_level="Level 1 State Emergency & Burns Center",
+                total_beds=600,
+                available_beds=45,
+                icu_capacity=28,
+                phone="+91 (80) 2670-1150",
                 trauma_team_status="STANDBY",
-                assigned_trauma_bay="Acute Bay 2",
+                assigned_trauma_bay="Acute Emergency Bay 3",
                 er_preparedness_notes=[
-                    "Comprehensive Burn Center with hyperbaric stabilization chamber"
+                    "Dedicated High-Dependency Burns Unit & Hyperbaric oxygenation ready"
                 ]
             ),
             Hospital(
                 id="hosp-04",
-                name="Kaiser Permanente Central Emergency",
-                address="2425 Geary Blvd, Western Addition",
-                coordinates=Coordinates(lat=37.7825, lng=-122.4410),
-                trauma_level="Level 2 Comprehensive Emergency",
-                total_beds=280,
-                available_beds=31,
-                icu_capacity=9,
-                phone="+1 (415) 833-2000",
+                name="Fortis Escorts Super-Speciality Hospital",
+                address="14 Cunningham Rd / Richmond Road, Bengaluru",
+                coordinates=Coordinates(lat=12.9860, lng=77.5980),
+                trauma_level="Level 2 Super-Speciality Trauma",
+                total_beds=300,
+                available_beds=26,
+                icu_capacity=14,
+                phone="+91 (80) 6621-4444",
                 trauma_team_status="STANDBY",
-                assigned_trauma_bay="ER Resuscitation Room A",
+                assigned_trauma_bay="Cardiac Trauma Suite A",
                 er_preparedness_notes=[
-                    "Rapid Cardiac Catheterization lab on 24/7 activation"
+                    "24/7 Primary Angioplasty & Emergency Resuscitation Suite ready"
                 ]
             )
         ]
         for h in initial_hospitals:
             self.hospitals[h.id] = h
 
-        # 5. Seed Smart Traffic Signals across Major Arterials
+        # 5. Seed Smart Traffic Signals across Major Indian Arterial Corridors
         initial_signals = [
             TrafficSignal(
                 id="sig-01",
-                intersection_name="Market St & 4th St Crossing",
-                coordinates=Coordinates(lat=37.7855, lng=-122.4055),
+                intersection_name="Silk Board Central Flyover Junction (Hosur Rd / ORR)",
+                coordinates=Coordinates(lat=12.9175, lng=77.6235),
                 state=TrafficSignalState.RED,
                 is_overridden=False,
                 last_state_change=now_iso
             ),
             TrafficSignal(
                 id="sig-02",
-                intersection_name="Market St & 8th St Transit Cross",
-                coordinates=Coordinates(lat=37.7788, lng=-122.4150),
+                intersection_name="Koramangala 100ft Rd & St. John's Hospital Crossing",
+                coordinates=Coordinates(lat=12.9240, lng=77.6220),
                 state=TrafficSignalState.RED,
                 is_overridden=False,
                 last_state_change=now_iso
             ),
             TrafficSignal(
                 id="sig-03",
-                intersection_name="Mission St & 16th St Arterial",
-                coordinates=Coordinates(lat=37.7650, lng=-122.4198),
+                intersection_name="Koramangala Sony World Signal (100ft Rd & 80ft Rd)",
+                coordinates=Coordinates(lat=12.9350, lng=77.6240),
                 state=TrafficSignalState.RED,
                 is_overridden=False,
                 last_state_change=now_iso
             ),
             TrafficSignal(
                 id="sig-04",
-                intersection_name="Potrero Ave & 22nd St Hospital Gate",
-                coordinates=Coordinates(lat=37.7580, lng=-122.4060),
+                intersection_name="MG Road - Brigade Road Metro Interchange",
+                coordinates=Coordinates(lat=12.9740, lng=77.6070),
                 state=TrafficSignalState.RED,
                 is_overridden=False,
                 last_state_change=now_iso
             ),
             TrafficSignal(
                 id="sig-05",
-                intersection_name="3rd St & Mariposa Waterfront Expressway",
-                coordinates=Coordinates(lat=37.7640, lng=-122.3890),
+                intersection_name="Indiranagar 100ft Road & CMH Road Junction",
+                coordinates=Coordinates(lat=12.9785, lng=77.6410),
                 state=TrafficSignalState.RED,
                 is_overridden=False,
                 last_state_change=now_iso
             ),
             TrafficSignal(
                 id="sig-06",
-                intersection_name="Van Ness Ave & Geary Blvd Highway Node",
-                coordinates=Coordinates(lat=37.7850, lng=-122.4215),
+                intersection_name="Marathahalli Bridge Outer Ring Road Flyover Node",
+                coordinates=Coordinates(lat=12.9560, lng=77.7010),
+                state=TrafficSignalState.RED,
+                is_overridden=False,
+                last_state_change=now_iso
+            ),
+            TrafficSignal(
+                id="sig-07",
+                intersection_name="Hebbal Flyover Expressway Junction (NH-44)",
+                coordinates=Coordinates(lat=13.0350, lng=77.5910),
                 state=TrafficSignalState.RED,
                 is_overridden=False,
                 last_state_change=now_iso

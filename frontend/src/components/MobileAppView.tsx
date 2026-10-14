@@ -60,7 +60,7 @@ export const MobileAppView: React.FC<MobileAppViewProps> = ({
           <div className="px-3 py-1 rounded-full bg-black/90 border border-white/15 flex items-center gap-2 shadow-inner">
             <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
             <span className="text-[10px] text-cyan-300 font-bold tracking-wider">
-              RESCUELINK 5G
+              🇮🇳 RESCUELINK 112 / 108
             </span>
           </div>
 
@@ -75,12 +75,15 @@ export const MobileAppView: React.FC<MobileAppViewProps> = ({
         {/* Mobile App Header */}
         <div className="px-4 py-3 border-b border-white/10 bg-slate-900/60 backdrop-blur-xl flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-xl bg-gradient-to-tr from-cyan-500 to-rose-500 text-black shadow-md">
-              <Shield className="w-5 h-5 fill-current" />
+            <div className="p-1.5 rounded-xl bg-gradient-to-tr from-amber-500 via-white to-emerald-500 text-black shadow-md">
+              <Shield className="w-5 h-5 fill-current text-slate-950" />
             </div>
             <div>
-              <h1 className="text-sm font-bold font-mono text-white tracking-wide">
-                RescuELINK Mobile
+              <h1 className="text-sm font-bold font-mono text-white tracking-wide flex items-center gap-1">
+                <span>RescuELINK</span>
+                <span className="text-[10px] text-amber-300 px-1 py-0.2 rounded bg-amber-500/20 border border-amber-500/30 font-bold">
+                  INDIA 🇮🇳
+                </span>
               </h1>
               <div className="flex items-center gap-1.5">
                 {governmentUser ? (

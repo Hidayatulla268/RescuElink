@@ -4,9 +4,8 @@ import {
   Hospital, TrafficSignal, GreenCorridorTransitSession
 } from '../types';
 import { 
-  Flame, Droplets, HeartPulse, Navigation, AlertTriangle, 
-  Radio, Layers, ZoomIn, ZoomOut, RotateCcw, Crosshair, Shield, Eye, Building2,
-  Zap, CheckCircle2, Compass, Activity, MapPin, Truck
+  AlertTriangle, Radio, ZoomIn, ZoomOut, RotateCcw, Crosshair, Building2,
+  Zap, CheckCircle2, Compass, Activity, MapPin, Truck, Satellite, Layers, Globe
 } from 'lucide-react';
 
 interface IncidentMapProps {
@@ -32,23 +31,24 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
   onSelectIncident,
   onSelectUnit
 }) => {
-  // Map viewport bounds (Metropolitan Bay Area)
+  // Map viewport bounds (Bengaluru Metro Corridor — India)
+  // Lat: 12.890 (Electronic City / Bannerghatta Apollo) to 13.060 (Hebbal Flyover / Airport Corridor)
+  // Lng: 77.520 (Majestic Metro Hub / West) to 77.720 (Whitefield Tech Corridor / East)
   const bounds = {
-    minLat: 37.745,
-    maxLat: 37.800,
-    minLng: -122.455,
-    maxLng: -122.382,
+    minLat: 12.890,
+    maxLat: 13.060,
+    minLng: 77.520,
+    maxLng: 77.720,
   };
 
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [mapPan, setMapPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [showSensors, setShowSensors] = useState<boolean>(true);
   const [showUnits, setShowUnits] = useState<boolean>(true);
-  const [showHazards, setShowHazards] = useState<boolean>(true);
   const [showHospitals, setShowHospitals] = useState<boolean>(true);
   const [showSignals, setShowSignals] = useState<boolean>(true);
   const [radarSweepEnabled, setRadarSweepEnabled] = useState<boolean>(true);
-  const [mapStyle, setMapStyle] = useState<'tactical' | 'satellite'>('tactical');
+  const [mapStyle, setMapStyle] = useState<'tactical' | 'satellite'>('satellite');
   const [hoveredNode, setHoveredNode] = useState<any>(null);
 
   // Convert (lat, lng) to SVG viewBox coordinates (width: 1000, height: 700)
@@ -98,7 +98,7 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
   const preemptedSignalsCount = trafficSignals.filter(s => s.state === 'EMERGENCY_OVERRIDE' || s.is_overridden).length;
 
   return (
-    <div className="relative w-full h-[640px] bg-[#060911] rounded-3xl border border-white/15 overflow-hidden shadow-2xl flex flex-col font-sans select-none">
+    <div className="relative w-full h-[640px] bg-[#050B14] rounded-3xl border border-white/15 overflow-hidden shadow-2xl flex flex-col font-sans select-none">
       
       {/* Top Tactical HUD & Radar Control Bar */}
       <div className="absolute top-3 left-3 right-3 z-30 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
@@ -112,16 +112,45 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-white tracking-wider">
-                TACTICAL RADAR & ARTERIAL GIS
+                🇮🇳 BENGALURU URBAN GIS RADAR
               </span>
               <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-                LIVE
+                112 / 108 LIVE
               </span>
             </div>
             <p className="text-[10px] text-slate-400">
-              {activeIncidentCount} Crises Detected • {preemptedSignalsCount} Signals Preempted
+              {activeIncidentCount} Crises Reported • {preemptedSignalsCount} Green Corridors Active
             </p>
           </div>
+        </div>
+
+        {/* View Switcher: SATELLITE VIEW vs TACTICAL GRID */}
+        <div className="pointer-events-auto flex items-center p-1 rounded-2xl glass-card-ultra border border-white/20 text-xs font-mono shadow-lg">
+          <button
+            onClick={() => setMapStyle('satellite')}
+            className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all duration-200 ${
+              mapStyle === 'satellite'
+                ? 'bg-gradient-to-r from-cyan-500/30 to-blue-600/30 text-cyan-200 border border-cyan-400/50 shadow-neon-blue font-bold'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+            }`}
+            title="Switch to Real-time ISRO High-Resolution Satellite Map View"
+          >
+            <Satellite className="w-4 h-4 text-cyan-400" />
+            <span>🛰️ Satellite View</span>
+          </button>
+
+          <button
+            onClick={() => setMapStyle('tactical')}
+            className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all duration-200 ${
+              mapStyle === 'tactical'
+                ? 'bg-gradient-to-r from-emerald-500/30 to-teal-600/30 text-emerald-200 border border-emerald-400/50 shadow-neon-green font-bold'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+            }`}
+            title="Switch to Tactical Cyber-GIS Grid View"
+          >
+            <Layers className="w-4 h-4 text-emerald-400" />
+            <span>🗺️ Tactical Grid</span>
+          </button>
         </div>
 
         {/* Quick Focus Actions */}
@@ -141,7 +170,7 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
             title="Focus Green Corridor"
           >
             <Zap className="w-3.5 h-3.5" />
-            <span>Focus Green Corridor</span>
+            <span>Focus Corridor</span>
           </button>
 
           <button
@@ -154,14 +183,14 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
             title="Toggle Live Radar Sweep Beam"
           >
             <Radio className="w-3.5 h-3.5" />
-            <span>Radar Sweep {radarSweepEnabled ? 'ON' : 'OFF'}</span>
+            <span>Radar {radarSweepEnabled ? 'ON' : 'OFF'}</span>
           </button>
         </div>
 
         {/* Zoom & View Reset Controls */}
         <div className="pointer-events-auto flex items-center gap-1 px-2 py-1 rounded-2xl glass-card-ultra border border-white/15 text-xs">
           <button
-            onClick={() => setZoomLevel(prev => Math.min(prev + 0.25, 2.2))}
+            onClick={() => setZoomLevel(prev => Math.min(prev + 0.25, 2.4))}
             className="p-1.5 rounded-xl hover:bg-white/10 text-slate-300 hover:text-white transition"
             title="Zoom In"
           >
@@ -185,8 +214,24 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
 
       </div>
 
+      {/* Satellite Recon Telemetry HUD Banner (Shown in Satellite View) */}
+      {mapStyle === 'satellite' && (
+        <div className="absolute top-16 left-4 z-20 pointer-events-none flex flex-col gap-1 text-[10px] font-mono text-cyan-300/80 bg-black/60 backdrop-blur-md px-3 py-2 rounded-xl border border-cyan-500/20 animate-fade-in">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+            <span className="font-bold text-white tracking-widest uppercase">ISRO CARTOSAT-3 / EOS-04 ORBITAL RECON</span>
+          </div>
+          <div className="text-[9px] text-slate-300 flex items-center gap-3">
+            <span>RES: 0.25m/PX</span>
+            <span>ALT: 505 KM LEO</span>
+            <span>BAND: TRUE-COLOR VNIR</span>
+            <span>CLOUD: 0.0%</span>
+          </div>
+        </div>
+      )}
+
       {/* SVG Canvas Map */}
-      <div className="flex-1 w-full h-full relative overflow-hidden bg-[#070C16]">
+      <div className={`flex-1 w-full h-full relative overflow-hidden ${mapStyle === 'satellite' ? 'bg-[#0a1219]' : 'bg-[#070C16]'}`}>
         <svg
           viewBox="0 0 1000 700"
           className="w-full h-full object-cover transition-transform duration-300"
@@ -196,19 +241,45 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
           }}
         >
           <defs>
-            {/* Dark Urban Grid Pattern */}
+            {/* Dark Urban Grid Pattern for Tactical View */}
             <pattern id="urbanGrid" width="50" height="50" patternUnits="userSpaceOnUse">
               <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255, 255, 255, 0.035)" strokeWidth="1" />
             </pattern>
 
-            {/* City Blocks Texture Pattern */}
-            <pattern id="cityBlockPattern" width="20" height="20" patternUnits="userSpaceOnUse">
-              <rect x="2" y="2" width="16" height="16" fill="rgba(14, 23, 42, 0.5)" rx="2" />
+            {/* Satellite Terrain Texture Pattern (Photorealistic Terrain Grain) */}
+            <pattern id="satelliteTerrainPattern" width="40" height="40" patternUnits="userSpaceOnUse">
+              <rect width="40" height="40" fill="#0C151F" />
+              <circle cx="10" cy="10" r="1.5" fill="rgba(255, 255, 255, 0.04)" />
+              <circle cx="28" cy="22" r="1.8" fill="rgba(14, 165, 233, 0.03)" />
+              <circle cx="18" cy="32" r="1.2" fill="rgba(16, 185, 129, 0.04)" />
+              <path d="M 0 20 Q 20 22 40 18" stroke="rgba(255, 255, 255, 0.02)" fill="none" />
             </pattern>
+
+            {/* Satellite Lush Greenery Pattern (Cubbon Park / Lalbagh) */}
+            <pattern id="satelliteVegetationPattern" width="16" height="16" patternUnits="userSpaceOnUse">
+              <rect width="16" height="16" fill="#0A2419" />
+              <circle cx="4" cy="4" r="3" fill="#0E3D29" />
+              <circle cx="12" cy="12" r="3.5" fill="#134E35" />
+              <circle cx="12" cy="4" r="2" fill="#166542" />
+            </pattern>
+
+            {/* Satellite Water Ripples Gradient (Ulsoor / Bellandur Lakes) */}
+            <linearGradient id="satelliteWaterGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#082032" />
+              <stop offset="50%" stopColor="#0B2F48" />
+              <stop offset="100%" stopColor="#051624" />
+            </linearGradient>
+
+            {/* Tactical Water Gradient */}
+            <linearGradient id="tacticalWaterGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#071322" />
+              <stop offset="50%" stopColor="#0B1C33" />
+              <stop offset="100%" stopColor="#05101E" />
+            </linearGradient>
 
             {/* Radial Glows */}
             <radialGradient id="p1CrisisGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="rgba(255, 23, 68, 0.45)" />
+              <stop offset="0%" stopColor="rgba(255, 23, 68, 0.5)" />
               <stop offset="60%" stopColor="rgba(255, 23, 68, 0.15)" />
               <stop offset="100%" stopColor="rgba(255, 23, 68, 0)" />
             </radialGradient>
@@ -219,16 +290,9 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
             </radialGradient>
 
             <radialGradient id="hospitalBlueGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="rgba(99, 102, 241, 0.4)" />
+              <stop offset="0%" stopColor="rgba(99, 102, 241, 0.45)" />
               <stop offset="100%" stopColor="rgba(99, 102, 241, 0)" />
             </radialGradient>
-
-            {/* Water Wave Texture */}
-            <linearGradient id="waterGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#071322" />
-              <stop offset="50%" stopColor="#0B1C33" />
-              <stop offset="100%" stopColor="#05101E" />
-            </linearGradient>
 
             {/* Radar Beam Gradient */}
             <linearGradient id="radarBeamGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -236,135 +300,325 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
               <stop offset="70%" stopColor="rgba(0, 229, 255, 0.08)" />
               <stop offset="100%" stopColor="rgba(0, 229, 255, 0.35)" />
             </linearGradient>
+
+            {/* Shadow Filter for Elevated Flyovers */}
+            <filter id="flyoverShadow" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="3" dy="4" stdDeviation="4" floodColor="#000000" floodOpacity="0.75" />
+            </filter>
           </defs>
 
-          {/* 1. BASE GEOGRAPHY & URBAN DISTRICTS */}
-          <rect width="1000" height="700" fill="#070C16" />
-          <rect width="1000" height="700" fill="url(#urbanGrid)" />
+          {/* 1. BASE TERRAIN LAYER (SATELLITE OR TACTICAL) */}
+          {mapStyle === 'satellite' ? (
+            <g id="satellite-base-layer">
+              <rect width="1000" height="700" fill="#0B1520" />
+              <rect width="1000" height="700" fill="url(#satelliteTerrainPattern)" opacity="0.9" />
 
-          {/* District Fills (Zoned Neighborhoods) */}
-          {/* District A: Financial Skyscraper Core */}
-          <polygon
-            points="460,110 740,110 740,340 460,340"
-            fill="rgba(30, 41, 59, 0.35)"
-            stroke="rgba(0, 229, 255, 0.15)"
-            strokeWidth="1"
-          />
-          <text x="475" y="130" fill="rgba(0, 229, 255, 0.45)" fontSize="9" fontFamily="monospace" fontWeight="bold" letterSpacing="1.5">
-            DOWNTOWN FINANCIAL & TECH CORE
-          </text>
+              {/* Urban Built-up Density Grids (Bengaluru Commercial & Residential Clusters) */}
+              {/* Tech Sector A: Whitefield IT Hub */}
+              <rect x="730" y="240" width="230" height="260" fill="#121D2A" opacity="0.65" rx="6" />
+              {/* Central CBD & MG Road */}
+              <rect x="360" y="260" width="220" height="180" fill="#162232" opacity="0.75" rx="8" />
+              {/* Koramangala & Silk Board Corridor */}
+              <rect x="420" y="440" width="250" height="220" fill="#14202E" opacity="0.7" rx="8" />
+              {/* Hebbal North Corridor */}
+              <rect x="320" y="50" width="260" height="180" fill="#111B27" opacity="0.6" rx="8" />
 
-          {/* District B: Medical & Civic Center */}
-          <polygon
-            points="180,220 440,220 440,460 180,460"
-            fill="rgba(30, 41, 59, 0.25)"
-            stroke="rgba(99, 102, 241, 0.15)"
-            strokeWidth="1"
-          />
-          <text x="195" y="240" fill="rgba(99, 102, 241, 0.5)" fontSize="9" fontFamily="monospace" fontWeight="bold" letterSpacing="1.5">
-            CIVIC CENTER & MEDICAL PLAZA
-          </text>
+              {/* Simulated Isometric 3D Commercial Building Footprints */}
+              <g fill="#1E2E42" stroke="#2D435E" strokeWidth="0.8" opacity="0.75">
+                <rect x="390" y="290" width="45" height="35" rx="2" filter="url(#flyoverShadow)" />
+                <rect x="450" y="300" width="55" height="40" rx="2" filter="url(#flyoverShadow)" />
+                <rect x="420" y="350" width="60" height="30" rx="2" filter="url(#flyoverShadow)" />
+                <rect x="760" y="280" width="65" height="50" rx="2" filter="url(#flyoverShadow)" />
+                <rect x="840" y="310" width="70" height="45" rx="2" filter="url(#flyoverShadow)" />
+                <rect x="780" y="380" width="85" height="55" rx="2" filter="url(#flyoverShadow)" />
+                <rect x="460" y="470" width="60" height="45" rx="2" filter="url(#flyoverShadow)" />
+                <rect x="540" y="500" width="55" height="50" rx="2" filter="url(#flyoverShadow)" />
+              </g>
 
-          {/* District C: Industrial Port & Waterfront Pier */}
-          <polygon
-            points="640,360 880,360 860,680 640,680"
-            fill="rgba(30, 41, 59, 0.3)"
-            stroke="rgba(245, 158, 11, 0.15)"
-            strokeWidth="1"
-          />
-          <text x="655" y="380" fill="rgba(245, 158, 11, 0.45)" fontSize="9" fontFamily="monospace" fontWeight="bold" letterSpacing="1.5">
-            PORT LOGISTICS & CHEMICAL PIER
-          </text>
+              {/* Satellite Greenery & Botanical Parks */}
+              {/* Cubbon Park Enclave (Near MG Road) */}
+              <g id="cubbon-park">
+                <polygon
+                  points="340,280 430,260 440,340 370,360 330,320"
+                  fill="url(#satelliteVegetationPattern)"
+                  stroke="#166542"
+                  strokeWidth="1.5"
+                  filter="url(#flyoverShadow)"
+                />
+                <text x="350" y="315" fill="#4ADE80" fontSize="8" fontFamily="monospace" fontWeight="bold">
+                  🌳 CUBBON PARK BIOSPHERE
+                </text>
+              </g>
 
-          {/* District D: Mission Residential & Transit Hub */}
-          <polygon
-            points="180,480 500,480 500,680 180,680"
-            fill="rgba(30, 41, 59, 0.25)"
-            stroke="rgba(16, 185, 129, 0.15)"
-            strokeWidth="1"
-          />
-          <text x="195" y="500" fill="rgba(16, 185, 129, 0.45)" fontSize="9" fontFamily="monospace" fontWeight="bold" letterSpacing="1.5">
-            MISSION ARTERIAL & TRANSIT HUB
-          </text>
+              {/* Lalbagh Botanical Gardens (South of Central CBD) */}
+              <g id="lalbagh-gardens">
+                <ellipse
+                  cx="370"
+                  cy="460"
+                  rx="65"
+                  ry="45"
+                  fill="url(#satelliteVegetationPattern)"
+                  stroke="#166542"
+                  strokeWidth="1.5"
+                  filter="url(#flyoverShadow)"
+                />
+                <text x="325" y="465" fill="#4ADE80" fontSize="8" fontFamily="monospace" fontWeight="bold">
+                  🌿 LALBAGH BOTANICAL
+                </text>
+              </g>
 
-          {/* 2. BAY WATERFRONT & MARINA */}
-          <path
-            d="M 720 0 Q 760 180 730 350 T 840 500 T 800 700 L 1000 700 L 1000 0 Z"
-            fill="url(#waterGradient)"
-            stroke="rgba(0, 229, 255, 0.35)"
-            strokeWidth="2"
-          />
-          
-          {/* Piers extending into the bay */}
-          <rect x="730" y="180" width="70" height="14" fill="#0E1E34" stroke="rgba(0, 229, 255, 0.4)" strokeWidth="1" rx="2" />
-          <text x="740" y="190" fill="#64748B" fontSize="7" fontFamily="monospace">PIER 14</text>
+              {/* Satellite Lakes with Shoreline Embankments */}
+              {/* Ulsoor Lake */}
+              <g id="ulsoor-lake">
+                <path
+                  d="M 520 250 Q 560 230 580 260 T 570 310 T 530 330 T 500 290 Z"
+                  fill="url(#satelliteWaterGradient)"
+                  stroke="#0284C7"
+                  strokeWidth="2"
+                  filter="url(#flyoverShadow)"
+                />
+                <text x="515" y="285" fill="#38BDF8" fontSize="8" fontFamily="monospace" fontWeight="bold">
+                  💧 ULSOOR LAKE
+                </text>
+              </g>
 
-          <rect x="715" y="270" width="85" height="16" fill="#0E1E34" stroke="rgba(0, 229, 255, 0.4)" strokeWidth="1" rx="2" />
-          <text x="725" y="281" fill="#64748B" fontSize="7" fontFamily="monospace">BULK WHARF</text>
+              {/* Bellandur Lake Watershed */}
+              <g id="bellandur-lake">
+                <path
+                  d="M 680 450 Q 760 410 820 440 T 840 510 T 770 540 T 700 500 Z"
+                  fill="url(#satelliteWaterGradient)"
+                  stroke="#0284C7"
+                  strokeWidth="2"
+                  filter="url(#flyoverShadow)"
+                />
+                <text x="720" y="480" fill="#38BDF8" fontSize="9" fontFamily="monospace" fontWeight="bold">
+                  💧 BELLANDUR LAKE BASIN
+                </text>
+              </g>
 
-          <rect x="760" y="440" width="80" height="18" fill="#0E1E34" stroke="rgba(245, 158, 11, 0.4)" strokeWidth="1" rx="2" />
-          <text x="770" y="452" fill="#F59E0B" fontSize="7" fontFamily="monospace">PIER 38 (HAZMAT)</text>
+              {/* Sankey Tank (North West) */}
+              <g id="sankey-tank">
+                <ellipse
+                  cx="280"
+                  cy="170"
+                  rx="40"
+                  ry="25"
+                  fill="url(#satelliteWaterGradient)"
+                  stroke="#0284C7"
+                  strokeWidth="1.5"
+                />
+                <text x="250" y="174" fill="#38BDF8" fontSize="7" fontFamily="monospace" fontWeight="bold">
+                  SANKEY TANK
+                </text>
+              </g>
 
-          <text x="860" y="220" fill="rgba(0, 229, 255, 0.4)" fontSize="13" fontFamily="monospace" fontWeight="bold" letterSpacing="4">
-            SAN FRANCISCO BAY
-          </text>
+              {/* Satellite Latitude / Longitude Recon Grid Overlay */}
+              <g stroke="rgba(56, 189, 248, 0.08)" strokeWidth="0.8" strokeDasharray="3 3">
+                <line x1="0" y1="175" x2="1000" y2="175" />
+                <line x1="0" y1="350" x2="1000" y2="350" />
+                <line x1="0" y1="525" x2="1000" y2="525" />
+                <line x1="250" y1="0" x2="250" y2="700" />
+                <line x1="500" y1="0" x2="500" y2="700" />
+                <line x1="750" y1="0" x2="750" y2="700" />
+              </g>
+            </g>
+          ) : (
+            /* Tactical Cyber Grid View */
+            <g id="tactical-base-layer">
+              <rect width="1000" height="700" fill="#070C16" />
+              <rect width="1000" height="700" fill="url(#urbanGrid)" />
 
-          {/* 3. CITY ARTERIAL ROADS & FREEWAYS */}
-          {/* Minor Street Grid Lines */}
-          <g stroke="rgba(255, 255, 255, 0.06)" strokeWidth="1.5" fill="none">
-            <line x1="120" y1="180" x2="720" y2="180" />
-            <line x1="120" y1="260" x2="720" y2="260" />
-            <line x1="120" y1="420" x2="800" y2="420" />
-            <line x1="120" y1="580" x2="800" y2="580" />
-            
-            <line x1="260" y1="80" x2="260" y2="680" />
-            <line x1="380" y1="80" x2="380" y2="680" />
-            <line x1="520" y1="80" x2="520" y2="680" />
-            <line x1="660" y1="80" x2="660" y2="680" />
-          </g>
+              {/* District Zoned Outlines */}
+              {/* Central CBD & MG Road */}
+              <polygon
+                points="340,240 600,240 600,420 340,420"
+                fill="rgba(30, 41, 59, 0.35)"
+                stroke="rgba(0, 229, 255, 0.2)"
+                strokeWidth="1"
+              />
+              <text x="355" y="260" fill="rgba(0, 229, 255, 0.5)" fontSize="9" fontFamily="monospace" fontWeight="bold" letterSpacing="1.5">
+                CENTRAL CBD & MG ROAD METRO HUB
+              </text>
 
-          {/* Major High-Speed Arterials with Lane Dividers */}
-          {/* Market Street Arterial (Diagonal Main Spine) */}
-          <g id="market-street">
-            <line x1="100" y1="620" x2="740" y2="200" stroke="#1E293B" strokeWidth="14" strokeLinecap="round" />
-            <line x1="100" y1="620" x2="740" y2="200" stroke="rgba(0, 229, 255, 0.3)" strokeWidth="10" strokeLinecap="round" />
-            <line x1="100" y1="620" x2="740" y2="200" stroke="#FFFFFF" strokeWidth="1.5" strokeDasharray="8 6" opacity="0.6" />
-            <text x="320" y="475" fill="#94A3B8" fontSize="8" fontFamily="monospace" fontWeight="bold" transform="rotate(-33 320 475)">
-              MARKET ST ARTERIAL (MAIN TRANSIT)
+              {/* Koramangala & Silk Board */}
+              <polygon
+                points="400,430 720,430 720,680 400,680"
+                fill="rgba(30, 41, 59, 0.3)"
+                stroke="rgba(16, 185, 129, 0.2)"
+                strokeWidth="1"
+              />
+              <text x="415" y="450" fill="rgba(16, 185, 129, 0.5)" fontSize="9" fontFamily="monospace" fontWeight="bold" letterSpacing="1.5">
+                KORAMANGALA & SILK BOARD INTERCHANGE
+              </text>
+
+              {/* Whitefield IT Expressway */}
+              <polygon
+                points="680,200 980,200 980,520 680,520"
+                fill="rgba(30, 41, 59, 0.3)"
+                stroke="rgba(245, 158, 11, 0.2)"
+                strokeWidth="1"
+              />
+              <text x="700" y="225" fill="rgba(245, 158, 11, 0.5)" fontSize="9" fontFamily="monospace" fontWeight="bold" letterSpacing="1.5">
+                WHITEFIELD TECH & ORR INDUSTRIAL CORRIDOR
+              </text>
+
+              {/* Hebbal North Express Corridor */}
+              <polygon
+                points="240,40 640,40 640,220 240,220"
+                fill="rgba(30, 41, 59, 0.25)"
+                stroke="rgba(99, 102, 241, 0.2)"
+                strokeWidth="1"
+              />
+              <text x="255" y="65" fill="rgba(99, 102, 241, 0.5)" fontSize="9" fontFamily="monospace" fontWeight="bold" letterSpacing="1.5">
+                HEBBAL & NORTH BENGALURU EXPRESSWAY (NH-44)
+              </text>
+
+              {/* Tactical Water Bodies */}
+              <path
+                d="M 520 260 Q 550 240 570 270 T 560 310 T 520 320 Z"
+                fill="url(#tacticalWaterGradient)"
+                stroke="rgba(0, 229, 255, 0.4)"
+                strokeWidth="1.5"
+              />
+              <text x="515" y="290" fill="rgba(0, 229, 255, 0.5)" fontSize="8" fontFamily="monospace">ULSOOR LAKE</text>
+
+              <path
+                d="M 700 460 Q 770 420 820 450 T 830 510 T 760 530 Z"
+                fill="url(#tacticalWaterGradient)"
+                stroke="rgba(0, 229, 255, 0.4)"
+                strokeWidth="1.5"
+              />
+              <text x="730" y="485" fill="rgba(0, 229, 255, 0.5)" fontSize="8" fontFamily="monospace">BELLANDUR LAKE</text>
+            </g>
+          )}
+
+          {/* 2. INDIAN METROPOLITAN HIGHWAYS & ARTERIAL CORRIDORS */}
+          {/* A. Outer Ring Road (ORR) Arterial Spine (Hebbal -> Marathahalli -> Silk Board) */}
+          <g id="outer-ring-road">
+            <path
+              d="M 350 110 Q 750 160 840 400 T 520 595"
+              stroke={mapStyle === 'satellite' ? '#171D26' : '#1E293B'}
+              strokeWidth="16"
+              fill="none"
+              filter={mapStyle === 'satellite' ? 'url(#flyoverShadow)' : undefined}
+            />
+            <path
+              d="M 350 110 Q 750 160 840 400 T 520 595"
+              stroke={mapStyle === 'satellite' ? '#2B394A' : 'rgba(0, 229, 255, 0.3)'}
+              strokeWidth="10"
+              fill="none"
+            />
+            {/* White/Yellow Lane Dividers */}
+            <path
+              d="M 350 110 Q 750 160 840 400 T 520 595"
+              stroke={mapStyle === 'satellite' ? '#FBBF24' : '#FFFFFF'}
+              strokeWidth="1.5"
+              strokeDasharray="8 6"
+              fill="none"
+              opacity="0.8"
+            />
+            <text x="750" y="320" fill="#94A3B8" fontSize="9" fontFamily="monospace" fontWeight="bold">
+              OUTER RING ROAD (ORR ARTERIAL)
             </text>
           </g>
 
-          {/* Mission Street Boulevard */}
-          <g id="mission-street">
-            <line x1="120" y1="660" x2="750" y2="300" stroke="#1E293B" strokeWidth="10" strokeLinecap="round" />
-            <line x1="120" y1="660" x2="750" y2="300" stroke="rgba(148, 163, 184, 0.3)" strokeWidth="6" strokeLinecap="round" />
-            <text x="360" y="535" fill="#64748B" fontSize="8" fontFamily="monospace" transform="rotate(-30 360 535)">
-              MISSION BLVD
+          {/* B. Hosur Road & Electronic City Elevated Tollway (Silk Board -> Electronic City) */}
+          <g id="hosur-road">
+            <line
+              x1="520" y1="595" x2="680" y2="700"
+              stroke={mapStyle === 'satellite' ? '#171D26' : '#1E293B'}
+              strokeWidth="18"
+              filter={mapStyle === 'satellite' ? 'url(#flyoverShadow)' : undefined}
+            />
+            <line
+              x1="520" y1="595" x2="680" y2="700"
+              stroke={mapStyle === 'satellite' ? '#3B4D63' : 'rgba(16, 185, 129, 0.4)'}
+              strokeWidth="12"
+            />
+            <line
+              x1="520" y1="595" x2="680" y2="700"
+              stroke="#FFFFFF"
+              strokeWidth="1.5"
+              strokeDasharray="6 4"
+            />
+            <text x="560" y="650" fill="#38BDF8" fontSize="8" fontFamily="monospace" fontWeight="bold">
+              HOSUR RD / E-CITY ELEVATED TOLLWAY (NH-44)
             </text>
           </g>
 
-          {/* Embarcadero Highway along the bay */}
-          <g id="embarcadero-highway">
-            <path d="M 720 30 Q 755 200 725 350 T 835 500 T 795 680" stroke="#1E293B" strokeWidth="12" fill="none" />
-            <path d="M 720 30 Q 755 200 725 350 T 835 500 T 795 680" stroke="rgba(0, 229, 255, 0.25)" strokeWidth="8" fill="none" />
-            <text x="735" y="100" fill="#94A3B8" fontSize="8" fontFamily="monospace" fontWeight="bold">
-              EMBARCADERO COASTAL HWY
+          {/* C. Silk Board Flyover Junction Hub (The Landmark Traffic Node) */}
+          <g id="silk-board-hub" transform="translate(520, 595)">
+            <circle cx="0" cy="0" r="24" fill="#0F172A" stroke="#F59E0B" strokeWidth="2.5" filter="url(#flyoverShadow)" />
+            <circle cx="0" cy="0" r="16" fill="#1E293B" stroke="#00E5FF" strokeWidth="1.5" />
+            <text x="0" y="4" textAnchor="middle" fill="#FFFFFF" fontSize="8" fontFamily="monospace" fontWeight="extrabold">
+              SILK BOARD
             </text>
           </g>
 
-          {/* Bay Bridge I-80 Suspension Highway */}
-          <g id="bay-bridge-i80">
-            <line x1="720" y1="210" x2="990" y2="130" stroke="#1E293B" strokeWidth="12" strokeLinecap="round" />
-            <line x1="720" y1="210" x2="990" y2="130" stroke="rgba(245, 158, 11, 0.4)" strokeWidth="6" strokeDasharray="6 3" strokeLinecap="round" />
-            {/* Bridge Suspension Towers */}
-            <circle cx="810" cy="183" r="5" fill="#F59E0B" stroke="#FFFFFF" strokeWidth="1.5" />
-            <circle cx="910" cy="153" r="5" fill="#F59E0B" stroke="#FFFFFF" strokeWidth="1.5" />
-            <text x="830" y="170" fill="#F59E0B" fontSize="8" fontFamily="monospace" fontWeight="bold">
-              BAY BRIDGE (I-80 SKYWAY)
+          {/* D. MG Road & Brigade Road Boulevard (CBD Spine) */}
+          <g id="mg-road-arterial">
+            <line
+              x1="220" y1="360" x2="640" y2="340"
+              stroke={mapStyle === 'satellite' ? '#1E293B' : '#1E293B'}
+              strokeWidth="12"
+              strokeLinecap="round"
+            />
+            <line
+              x1="220" y1="360" x2="640" y2="340"
+              stroke={mapStyle === 'satellite' ? '#475569' : 'rgba(0, 229, 255, 0.3)'}
+              strokeWidth="8"
+              strokeLinecap="round"
+            />
+            <line
+              x1="220" y1="360" x2="640" y2="340"
+              stroke="#FFFFFF"
+              strokeWidth="1.5"
+              strokeDasharray="6 6"
+              opacity="0.8"
+            />
+            <text x="310" y="330" fill="#94A3B8" fontSize="8" fontFamily="monospace" fontWeight="bold">
+              MG ROAD & BRIGADE RD METRO BOULEVARD
             </text>
           </g>
 
-          {/* 4. ACTIVE GREEN CORRIDOR ARTERIAL PATH (GLOWING EMERALD SUPER-HIGHWAY) */}
+          {/* E. Old Airport Road (Domlur Flyover -> Manipal Hospital -> HAL) */}
+          <g id="old-airport-road">
+            <line
+              x1="450" y1="350" x2="800" y2="420"
+              stroke={mapStyle === 'satellite' ? '#171D26' : '#1E293B'}
+              strokeWidth="10"
+              strokeLinecap="round"
+            />
+            <line
+              x1="450" y1="350" x2="800" y2="420"
+              stroke={mapStyle === 'satellite' ? '#3B4D63' : 'rgba(148, 163, 184, 0.3)'}
+              strokeWidth="6"
+              strokeLinecap="round"
+            />
+            <text x="560" y="405" fill="#64748B" fontSize="8" fontFamily="monospace">
+              OLD AIRPORT ROAD (HAL ARTERIAL)
+            </text>
+          </g>
+
+          {/* F. Hebbal Flyover & Kempegowda Airport Expressway (NH-44 North) */}
+          <g id="hebbal-airport-expressway">
+            <line
+              x1="350" y1="110" x2="420" y2="0"
+              stroke={mapStyle === 'satellite' ? '#171D26' : '#1E293B'}
+              strokeWidth="16"
+              filter={mapStyle === 'satellite' ? 'url(#flyoverShadow)' : undefined}
+            />
+            <line
+              x1="350" y1="110" x2="420" y2="0"
+              stroke={mapStyle === 'satellite' ? '#2B394A' : 'rgba(245, 158, 11, 0.4)'}
+              strokeWidth="10"
+            />
+            <text x="375" y="55" fill="#F59E0B" fontSize="8" fontFamily="monospace" fontWeight="bold">
+              HEBBAL FLYOVER (NH-44 AIRPORT TOLLWAY)
+            </text>
+          </g>
+
+          {/* 3. ACTIVE GREEN CORRIDOR ARTERIAL PATH (GLOWING EMERALD SUPER-HIGHWAY) */}
           {activeCorridor && activeCorridor.corridor_waypoints.length >= 2 && (
             <g id="green-corridor-highway-glow">
               {activeCorridor.corridor_waypoints.map((pt, i) => {
@@ -380,8 +634,8 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
                       x2={p2.x}
                       y2={p2.y}
                       stroke="#00E676"
-                      strokeWidth="16"
-                      strokeOpacity="0.25"
+                      strokeWidth="18"
+                      strokeOpacity="0.3"
                       strokeLinecap="round"
                     />
                     {/* Mid ribbon */}
@@ -391,18 +645,18 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
                       x2={p2.x}
                       y2={p2.y}
                       stroke="#00E676"
-                      strokeWidth="7"
-                      strokeOpacity="0.85"
+                      strokeWidth="8"
+                      strokeOpacity="0.9"
                       strokeLinecap="round"
                     />
-                    {/* Animated white running pulse dashes */}
+                    {/* Animated running pulse dashes */}
                     <line
                       x1={p1.x}
                       y1={p1.y}
                       x2={p2.x}
                       y2={p2.y}
                       stroke="#FFFFFF"
-                      strokeWidth="2.5"
+                      strokeWidth="3"
                       strokeDasharray="10 8"
                       className="animate-pulse"
                     />
@@ -413,16 +667,16 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
               {/* Green Corridor Title Banner along route */}
               {activeCorridor.corridor_waypoints[0] && (
                 <g transform={`translate(${project(activeCorridor.corridor_waypoints[0].lat, activeCorridor.corridor_waypoints[0].lng).x - 40}, ${project(activeCorridor.corridor_waypoints[0].lat, activeCorridor.corridor_waypoints[0].lng).y - 25})`}>
-                  <rect width="180" height="20" rx="6" fill="rgba(6, 78, 59, 0.9)" stroke="#00E676" strokeWidth="1.5" />
-                  <text x="90" y="14" textAnchor="middle" fill="#FFFFFF" fontSize="9" fontFamily="monospace" fontWeight="bold">
-                    🟢 GREEN CORRIDOR IN-TRANSIT
+                  <rect width="210" height="22" rx="6" fill="rgba(6, 78, 59, 0.95)" stroke="#00E676" strokeWidth="1.5" />
+                  <text x="105" y="15" textAnchor="middle" fill="#FFFFFF" fontSize="9" fontFamily="monospace" fontWeight="bold">
+                    🟢 108 GREEN CORRIDOR IN-TRANSIT
                   </text>
                 </g>
               )}
             </g>
           )}
 
-          {/* 5. RADAR SWEEP BEAM ANIMATION */}
+          {/* 4. RADAR SWEEP BEAM ANIMATION */}
           {radarSweepEnabled && (
             <g id="radar-sweep-cone" className="pointer-events-none">
               <circle cx="500" cy="350" r="340" fill="none" stroke="rgba(0, 229, 255, 0.15)" strokeWidth="1" strokeDasharray="4 4" />
@@ -437,7 +691,7 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
             </g>
           )}
 
-          {/* 6. SMART TRAFFIC LIGHT NODES */}
+          {/* 5. SMART TRAFFIC LIGHT NODES (With Preemption Glow) */}
           {showSignals && trafficSignals.map(sig => {
             const { x, y } = project(sig.coordinates.lat, sig.coordinates.lng);
             const isGreen = sig.state === 'EMERGENCY_OVERRIDE' || sig.is_overridden;
@@ -455,10 +709,10 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
                   <circle
                     cx={x}
                     cy={y}
-                    r="18"
+                    r="20"
                     fill="none"
                     stroke="#00E676"
-                    strokeWidth="2"
+                    strokeWidth="2.5"
                     className="animate-ping"
                   />
                 )}
@@ -484,9 +738,9 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
                 {/* Label Badge */}
                 <g transform={`translate(${x}, ${y + 22})`}>
                   <rect
-                    x="-34"
+                    x="-40"
                     y="0"
-                    width="68"
+                    width="80"
                     height="14"
                     rx="4"
                     fill={isGreen ? 'rgba(6, 78, 59, 0.95)' : 'rgba(15, 23, 42, 0.9)'}
@@ -502,14 +756,14 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
                     fontFamily="monospace"
                     fontWeight="bold"
                   >
-                    {isGreen ? '100% GREEN' : 'SIGNAL RED'}
+                    {isGreen ? '🟢 100% GREEN' : '🔴 RED CROSS'}
                   </text>
                 </g>
               </g>
             );
           })}
 
-          {/* 7. RECEIVING TRAUMA HOSPITALS */}
+          {/* 6. RECEIVING TRAUMA HOSPITALS (APOLLO, MANIPAL, VICTORIA, FORTIS) */}
           {showHospitals && hospitals.map(hosp => {
             const { x, y } = project(hosp.coordinates.lat, hosp.coordinates.lng);
             return (
@@ -521,7 +775,7 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
                 onMouseLeave={() => setHoveredNode(null)}
               >
                 {/* Hospital Ambient Aura */}
-                <circle cx={x} cy={y} r="26" fill="url(#hospitalBlueGlow)" />
+                <circle cx={x} cy={y} r="28" fill="url(#hospitalBlueGlow)" />
                 
                 {/* Hospital Shield */}
                 <circle cx={x} cy={y} r="15" fill="#1E1B4B" stroke="#6366F1" strokeWidth="2" />
@@ -533,9 +787,9 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
                 {/* Hospital Name & Ready Bays Badge */}
                 <g transform={`translate(${x}, ${y + 22})`}>
                   <rect
-                    x="-55"
+                    x="-65"
                     y="0"
-                    width="110"
+                    width="130"
                     height="16"
                     rx="4"
                     fill="rgba(15, 23, 42, 0.95)"
@@ -558,7 +812,7 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
             );
           })}
 
-          {/* 8. ACTIVE EMERGENCY INCIDENTS (RADAR BEACONS) */}
+          {/* 7. ACTIVE EMERGENCY INCIDENTS (RADAR BEACONS) */}
           {incidents.map(inc => {
             const { x, y } = project(inc.coordinates.lat, inc.coordinates.lng);
             const isSelected = selectedIncident?.id === inc.id;
@@ -621,17 +875,17 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
                     strokeWidth={isSelected ? "2" : "1.2"}
                   />
                   <text x="8" y="11" fill="#FFFFFF" fontSize="9" fontFamily="monospace" fontWeight="bold">
-                    {inc.title.slice(0, 24)}{inc.title.length > 24 ? '...' : ''}
+                    {inc.title.slice(0, 26)}{inc.title.length > 26 ? '...' : ''}
                   </text>
                   <text x="8" y="20" fill="#94A3B8" fontSize="7" fontFamily="monospace">
-                    {inc.location_address.slice(0, 28)}
+                    {inc.location_address.slice(0, 30)}
                   </text>
                 </g>
               </g>
             );
           })}
 
-          {/* 9. FIRST RESPONDER EMERGENCY UNITS (AMBULANCES, FIRE, POLICE) */}
+          {/* 8. INDIAN FIRST RESPONDER UNITS (108 AMBULANCES, FIRE 101, POLICE 100) */}
           {showUnits && units.map(unit => {
             const { x, y } = project(unit.location.lat, unit.location.lng);
             const isEnRoute = unit.status === 'EN_ROUTE' || unit.status === 'DISPATCHED';
@@ -663,12 +917,12 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
                 
                 {/* Unit Symbol */}
                 <text x={x} y={y + 4} textAnchor="middle" fill={isEnRoute ? '#050B14' : '#00E5FF'} fontSize="9" fontWeight="extrabold" fontFamily="monospace">
-                  {unit.callsign.includes('AMB') || unit.callsign.includes('MEDIC') ? '🚑' : unit.callsign.includes('FIRE') ? '🚒' : '🚓'}
+                  {unit.callsign.includes('108') || unit.callsign.includes('AMB') ? '🚑' : unit.callsign.includes('FIRE') || unit.callsign.includes('SDRF') ? '🚒' : unit.callsign.includes('POLICE') ? '🚓' : '🛸'}
                 </text>
 
                 {/* Callsign Tag */}
                 <g transform={`translate(${x}, ${y + 14})`}>
-                  <rect x="-30" y="0" width="60" height="13" rx="3" fill="rgba(8, 12, 22, 0.9)" stroke="#00E5FF" strokeWidth="0.8" />
+                  <rect x="-34" y="0" width="68" height="13" rx="3" fill="rgba(8, 12, 22, 0.9)" stroke="#00E5FF" strokeWidth="0.8" />
                   <text x="0" y="9" textAnchor="middle" fill="#E2E8F0" fontSize="7" fontFamily="monospace" fontWeight="bold">
                     {unit.callsign.split(' ')[0]} ({unit.status === 'IDLE' ? 'FREE' : 'BUSY'})
                   </text>
@@ -758,17 +1012,17 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
         <div className="flex flex-wrap items-center gap-5">
           <div className="flex items-center gap-2">
             <span className="w-3.5 h-3.5 rotate-45 bg-rose-500 border border-white shadow-neon-red inline-block" />
-            <span className="text-slate-200 font-bold">🚨 911 Crisis Beacon</span>
+            <span className="text-slate-200 font-bold">🚨 112 Crisis Beacon</span>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="w-3.5 h-3.5 rounded-md bg-cyan-400 border border-white inline-block" />
-            <span className="text-slate-200 font-bold">🚑 Emergency Responder</span>
+            <span className="text-slate-200 font-bold">🚑 108 Emergency Ambulance</span>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="w-4 h-2 rounded-full bg-emerald-400 shadow-neon-green inline-block" />
-            <span className="text-emerald-300 font-bold">🟢 Green Corridor (Signal Override &lt; 1 km)</span>
+            <span className="text-emerald-300 font-bold">🟢 Green Corridor (&lt; 1 km Preemption)</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -779,7 +1033,7 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
 
         <div className="flex items-center gap-3">
           <span className="text-[11px] text-slate-400">
-            Click any beacon or marker on map to view tactical details
+            {mapStyle === 'satellite' ? '🛰️ ISRO High-Res Satellite View Active' : '🗺️ Tactical Grid Active'}
           </span>
           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
             RADAR 100% ONLINE

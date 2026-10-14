@@ -243,21 +243,25 @@ Example:
             except Exception as e:
                 logger.error(f"Gemini broadcast generation failed: {e}")
 
-        # Intelligent Multi-language fallback
+        # Intelligent Multi-language fallback (Indian Regional & National Languages)
         alerts = {}
         for lang in languages:
             if lang == "English":
-                alerts["English"] = f"EMERGENCY ALERT ({category.replace('_', ' ')}): Hazard reported at {location}. Maintain {advisory_type.replace('_', ' ')}. Follow official instructions and clear emergency lanes."
-            elif lang == "Spanish":
-                alerts["Spanish"] = f"ALERTA DE EMERGENCIA ({category.replace('_', ' ')}): Peligro reportado en {location}. Mantenga precauciones. Siga las instrucciones oficiales y despeje las vías."
+                alerts["English"] = f"EMERGENCY ALERT ({category.replace('_', ' ')}): Hazard reported at {location}. Maintain {advisory_type.replace('_', ' ')}. Clear lanes for 108 emergency ambulances."
             elif lang == "Hindi":
-                alerts["Hindi"] = f"आपातकालीन चेतावनी: {location} के पास खतरा। सुरक्षित स्थान पर रहें, खिड़कियां बंद रखें और आपातकालीन वाहनों के लिए रास्ता खाली रखें।"
-            elif lang == "French":
-                alerts["French"] = f"ALERTE D'URGENCE: Incident signalé à {location}. Veuillez rester à l'abri, fermer les fenêtres et laisser les voies libres aux secours."
-            elif lang == "Arabic":
-                alerts["Arabic"] = f"تنبيه طوارئ: تم الإبلاغ عن حادث في {location}. يرجى البقاء في مكان آمن وإخلاء مسارات مركبات الطوارئ."
+                alerts["Hindi"] = f"आपातकालीन चेतावनी: {location} के पास गंभीर खतरा। कृपया सुरक्षित स्थान पर रहें और आपातकालीन एम्बुलेंस (108/112) के लिए मार्ग खाली रखें।"
+            elif lang == "Kannada":
+                alerts["Kannada"] = f"ತುರ್ತು ಎಚ್ಚರಿಕೆ: {location} ಬಳಿ ಅಪಾಯ ವರದಿಯಾಗಿದೆ. ಸುರಕ್ಷಿತವಾಗಿರಿ ಮತ್ತು 108/112 ತುರ್ತು ಆಂಬ್ಯುಲೆನ್ಸ್‌ಗಳಿಗೆ ದಾರಿ ಮಾಡಿಕೊಡಿ."
+            elif lang == "Tamil":
+                alerts["Tamil"] = f"அவசர எச்சரிக்கை: {location} பகுதியில் தீவிர ஆபத்து. பாதுகாப்பாக இருங்கள் மற்றும் 108 அவசர சிகிச்சை ஊர்திகளுக்கு வழி விடுங்கள்."
+            elif lang == "Telugu":
+                alerts["Telugu"] = f"అత్యవసర హెచ్చరిక: {location} వద్ద ప్రమాదం సంభవించింది. సురక్షితంగా ఉండండి మరియు 108 అంబులెన్స్‌కు దారి ఇవ్వండి."
+            elif lang == "Bengali":
+                alerts["Bengali"] = f"জরুরি সতর্কতা: {location}-এর কাছে গুরুতর বিপদ। নিরাপদে থাকুন এবং ১০৮ জরুরি অ্যাম্বুলেন্সের পথ সুগম রাখুন।"
+            elif lang == "Marathi":
+                alerts["Marathi"] = f"तातडीची सूचना: {location} जवळ धोका निर्माण झाला आहे. सुरक्षित स्थळी राहा आणि 108 रुग्णवाहिकेसाठी रस्ता मोकळा ठेवा."
             else:
-                alerts[lang] = f"EMERGENCY ADVISORY: Incident active at {location}. Heed emergency personnel instructions immediately."
+                alerts[lang] = f"EMERGENCY ADVISORY: Hazard active at {location}. Yield right of way to 108 / 112 emergency services immediately."
         return alerts
 
 gemini_service = GeminiService()

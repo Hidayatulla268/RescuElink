@@ -20,11 +20,11 @@ export const NewIncidentModal: React.FC<NewIncidentModalProps> = ({
   if (!isOpen) return null;
 
   const [title, setTitle] = useState<string>('');
-  const [callerName, setCallerName] = useState<string>('Jane Doe (Resident)');
-  const [callerPhone, setCallerPhone] = useState<string>('+1 (415) 555-0988');
-  const [address, setAddress] = useState<string>('Market St & 5th St, Metro Core');
-  const [lat, setLat] = useState<number>(37.7840);
-  const [lng, setLng] = useState<number>(-122.4080);
+  const [callerName, setCallerName] = useState<string>('Aarav Sharma (Resident)');
+  const [callerPhone, setCallerPhone] = useState<string>('+91 98450 11200');
+  const [address, setAddress] = useState<string>('Silk Board Flyover Ramp, Hosur Rd & ORR');
+  const [lat, setLat] = useState<number>(12.9180);
+  const [lng, setLng] = useState<number>(77.6240);
   const [description, setDescription] = useState<string>('');
   const [hasImage, setHasImage] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -34,38 +34,38 @@ export const NewIncidentModal: React.FC<NewIncidentModalProps> = ({
     {
       name: 'Hazardous Chemical Fire',
       icon: <Flame className="w-3.5 h-3.5 text-rose-400" />,
-      title: 'Solvent Warehouse Blaze & Plume Formation',
-      addr: 'Pier 38 Bulk Terminal, South Pier',
-      lat: 37.7830,
-      lng: -122.3890,
-      desc: 'Solvents ignited in warehouse barrel bay. Heavy acrid orange smoke drifting toward residential apartments. Worker trapped on catwalk.'
+      title: 'Solvent Warehouse Blaze & Toxic Plume',
+      addr: 'Whitefield Industrial Export Zone, Phase II',
+      lat: 12.9720,
+      lng: 77.7150,
+      desc: 'Solvents ignited in warehouse barrel bay. Heavy acrid smoke drifting toward residential IT township. Two factory technicians unaccounted for.'
     },
     {
-      name: 'Flash Flood Vehicle Inundation',
+      name: 'Monsoon Underpass Flood',
       icon: <Droplets className="w-3.5 h-3.5 text-cyan-400" />,
-      title: 'Arterial Underpass Flood with Submerged Bus',
-      addr: 'Cesar Chavez Subway Underpass',
-      lat: 37.7510,
-      lng: -122.4060,
-      desc: 'Torrential storm runoff has flooded the underpass 1.8 meters high. City transit bus stalled with 6 elderly passengers unable to evacuate.'
+      title: 'Bellandur Arterial Underpass Monsoon Inundation',
+      addr: 'Bellandur Outer Ring Road Subterranean Underpass',
+      lat: 12.9360,
+      lng: 77.6730,
+      desc: 'Monsoon cloudburst flooded the underpass 2.1 meters high. BMTC city bus stalled with passengers stranded on vehicle roof.'
     },
     {
-      name: 'Structural Balcony Collapse',
+      name: 'Structural Facade Collapse',
       icon: <Building className="w-3.5 h-3.5 text-amber-400" />,
-      title: 'Historic Masonry Facade & Balcony Collapse',
-      addr: '420 Montgomery St, Financial District',
-      lat: 37.7925,
-      lng: -122.4030,
-      desc: 'Three-story concrete balcony collapsed onto pedestrian sidewalk during morning rush hour. Two pedestrians pinned under rubble.'
+      title: 'Brigade Road Commercial Enclave Balcony Collapse',
+      addr: 'Brigade Towers, 135 Brigade Rd, Central CBD',
+      lat: 12.9730,
+      lng: 77.6080,
+      desc: 'Concrete sunshade & glass facade collapsed onto pedestrian pavement during evening rush hour. Two pedestrians pinned under rubble.'
     },
     {
-      name: 'Acute Cardiac Collapse',
+      name: 'Acute Cardiac Emergency',
       icon: <HeartPulse className="w-3.5 h-3.5 text-emerald-400" />,
-      title: 'Transit Station Unresponsive Civilian',
-      addr: 'Powell St BART Concourse Platform',
-      lat: 37.7845,
-      lng: -122.4070,
-      desc: 'Commuter collapsed near turnstiles, no pulse detected, bystander initiating chest compressions. Automated external defibrillator requested.'
+      title: 'Majestic Metro Interchange Commuter Collapse',
+      addr: 'Kempegowda Majestic Metro Concourse Platform',
+      lat: 12.9780,
+      lng: 77.5720,
+      desc: 'Elderly commuter collapsed near turnstiles, no pulse detected, bystander CPR in progress. 108 ALS Ambulance & defibrillator requested.'
     }
   ];
 

@@ -22,14 +22,14 @@ export const CitizenSnapModal: React.FC<CitizenSnapModalProps> = ({
   if (!isOpen) return null;
 
   const [locationAddress, setLocationAddress] = useState<string>(
-    'Market St & 6th St Intersection, Downtown Corridor'
+    'Silk Board Central Flyover Junction, Hosur Rd & ORR'
   );
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number }>({
-    lat: 37.7815,
-    lng: -122.4110
+    lat: 12.9180,
+    lng: 77.6240
   });
   const [notes, setNotes] = useState<string>(
-    'High-speed two-car collision at intersection. Driver trapped in driver seat, smoke emerging from crushed radiator.'
+    'High-speed two-car collision with BMTC bus at Silk Board flyover. Driver trapped, radiator smoking, petrol leaking onto tarmac.'
   );
   const [selectedPreset, setSelectedPreset] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -37,25 +37,25 @@ export const CitizenSnapModal: React.FC<CitizenSnapModalProps> = ({
 
   const presets = [
     {
-      title: 'Two-Car Intersection T-Bone Collision',
-      loc: 'Market St & 6th St Intersection',
-      coords: { lat: 37.7815, lng: -122.4110 },
-      notes: 'Severe side-impact collision. Driver door deformed, passenger screaming in shock. Liquid leaking onto asphalt.',
-      badge: 'High Impact Trauma'
+      title: 'Silk Board Flyover Multi-Vehicle Collision',
+      loc: 'Silk Board Central Flyover Junction, Hosur Rd & ORR',
+      coords: { lat: 12.9180, lng: 77.6240 },
+      notes: 'Severe multi-vehicle collision on flyover ramp. Car crumpled against BMTC bus, auto-rickshaw overturned, fuel leaking on tarmac.',
+      badge: 'High Impact Flyover Trauma'
     },
     {
-      title: 'Motorcycle Highway Skid & Pinned Rider',
-      loc: 'Bay Bridge Inbound On-Ramp at 5th St',
-      coords: { lat: 37.7830, lng: -122.4010 },
-      notes: 'Motorcycle slipped on wet steel expansion plate. Rider thrown 15 meters, unresponsive on left shoulder.',
-      badge: 'Critical Life-Threat'
+      title: 'Koramangala 100ft Road Two-Wheeler Collision',
+      loc: 'Koramangala 100ft Road & Sony World Crossing',
+      coords: { lat: 12.9350, lng: 77.6240 },
+      notes: 'Two-wheeler collision at intersection. Rider thrown 10 meters, unconscious with head laceration. Bystanders gathering.',
+      badge: 'Critical Neuro Trauma'
     },
     {
-      title: 'Pedestrian Struck by Vehicle Crosswalk',
-      loc: 'Mission St & 16th St Transit Hub',
-      coords: { lat: 37.7650, lng: -122.4198 },
-      notes: 'Pedestrian struck while crossing. Severe lower extremity trauma and head laceration.',
-      badge: 'Acute Trauma'
+      title: 'MG Road Metro Station Pedestrian Crosswalk Accident',
+      loc: 'MG Road Metro Station Pedestrian Concourse, Brigade Rd Corner',
+      coords: { lat: 12.9740, lng: 77.6070 },
+      notes: 'Pedestrian struck by speeding car at pedestrian crossing. Multiple lower-limb fractures, acute trauma.',
+      badge: 'Acute Emergency'
     }
   ];
 
@@ -73,8 +73,8 @@ export const CitizenSnapModal: React.FC<CitizenSnapModalProps> = ({
         image_base64: 'data:image/jpeg;base64,simulated_roadway_crash_capture',
         location_address: locationAddress,
         coordinates: coordinates,
-        reporter_name: 'Bystander Citizen',
-        reporter_phone: '+1 (415) 555-8291',
+        reporter_name: 'Bystander Citizen (Aarav Patel)',
+        reporter_phone: '+91 98450 11208',
         optional_notes: notes
       });
       setScrambleResult(res);
