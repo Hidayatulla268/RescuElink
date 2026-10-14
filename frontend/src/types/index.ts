@@ -33,12 +33,11 @@ export type UnitStatus =
   | 'OFFLINE';
 
 export interface Coordinates {
-  lat: float;
-  lng: float;
+  /** Latitude in decimal degrees */
+  lat: number;
+  /** Longitude in decimal degrees */
+  lng: number;
 }
-
-// In typescript float is number
-export type float = number;
 
 export interface ResponderUnit {
   id: string;

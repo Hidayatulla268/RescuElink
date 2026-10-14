@@ -1,12 +1,18 @@
+"""
+RescuELINK: Autonomous Smart City AI Emergency Dispatch & Urban Resilience Command System.
+FastAPI Application Entry Point.
+"""
+
 import asyncio
 import random
 import time
+import logging
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from typing import Optional, Dict, Any, List
 from pydantic import BaseModel, Field
-from typing import Optional
 
-from fastapi import FastAPI, Request, HTTPException, Depends
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
@@ -26,6 +32,8 @@ from app.core.security import (
     verify_gov_token,
     sanitize_input_text
 )
+
+logger = logging.getLogger(__name__)
 
 
 # Optimized background telemetry simulation
@@ -100,7 +108,8 @@ async def simulate_smart_city_telemetry():
 
         except asyncio.CancelledError:
             break
-        except Exception:
+        except Exception as exc:
+            logger.error(f"Telemetry cycle error: {exc}", exc_info=False)
             await asyncio.sleep(5)
 
 
@@ -157,6 +166,7 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled exception at {request.url.path}: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
         content={
@@ -180,13 +190,40 @@ class GovLoginRequest(BaseModel):
 class GovLoginResponse(BaseModel):
     access_token: str
     token_type: str = "Bearer"
-    user: dict
+    user: Dict[str, Any]
     expires_in_seconds: int = 86400
     issued_at: str
 
+class TokenVerifyRequest(BaseModel):
+    token: str = Field(..., min_length=10, description="HMAC-SHA256 bearer token string")
+
+class TokenVerifyResponse(BaseModel):
+    valid: bool
+    claims: Dict[str, Any]
+
+class HealthSecurityStatus(BaseModel):
+    rate_limiter_active: bool = True
+    security_headers: bool = True
+    gzip_compression: bool = True
+    rbac_auth: bool = True
+
+class HealthCheckResponse(BaseModel):
+    status: str
+    system: str
+    version: str
+    gemini_model: str
+    api_key_configured: bool
+    security: HealthSecurityStatus
+
+class RootResponse(BaseModel):
+    message: str
+    docs_url: str
+    api_prefix: str
+    helplines: Dict[str, int]
+
 
 @app.post(f"{settings.API_V1_STR}/auth/gov-login", response_model=GovLoginResponse, tags=["Authentication"])
-async def government_login(payload: GovLoginRequest):
+async def government_login(payload: GovLoginRequest) -> GovLoginResponse:
     """
     Authenticates an official government worker (Ambulance Driver, Fire Chief, Police, ER Doctor, Dispatcher)
     and returns a signed cryptographic HMAC-SHA256 bearer token.
@@ -214,14 +251,11 @@ async def government_login(payload: GovLoginRequest):
     )
 
 
-class TokenVerifyRequest(BaseModel):
-    token: str
-
-@app.post(f"{settings.API_V1_STR}/auth/verify", tags=["Authentication"])
-async def verify_token(payload: TokenVerifyRequest):
+@app.post(f"{settings.API_V1_STR}/auth/verify", response_model=TokenVerifyResponse, tags=["Authentication"])
+async def verify_token(payload: TokenVerifyRequest) -> TokenVerifyResponse:
     """Verifies a government bearer token signature and expiration."""
     claims = verify_gov_token(payload.token)
-    return {"valid": True, "claims": claims}
+    return TokenVerifyResponse(valid=True, claims=claims)
 
 
 # Include Routers
@@ -229,33 +263,34 @@ app.include_router(incidents_router, prefix=settings.API_V1_STR, tags=["Incident
 app.include_router(analytics_router, prefix=settings.API_V1_STR, tags=["Analytics & Risk Matrix"])
 app.include_router(ws_router, prefix=settings.API_V1_STR, tags=["Realtime WebSocket"])
 
-@app.get("/health", tags=["System"])
-async def health_check():
+@app.get("/health", response_model=HealthCheckResponse, tags=["System"])
+async def health_check() -> HealthCheckResponse:
     """System health check and environmental status."""
-    return {
-        "status": "healthy",
-        "system": settings.PROJECT_NAME,
-        "version": settings.VERSION,
-        "gemini_model": settings.GEMINI_MODEL,
-        "api_key_configured": bool(settings.GEMINI_API_KEY),
-        "security": {
-            "rate_limiter_active": True,
-            "security_headers": True,
-            "gzip_compression": True,
-            "rbac_auth": True
-        }
-    }
+    return HealthCheckResponse(
+        status="healthy",
+        system=settings.PROJECT_NAME,
+        version=settings.VERSION,
+        gemini_model=settings.GEMINI_MODEL,
+        api_key_configured=bool(settings.GEMINI_API_KEY),
+        security=HealthSecurityStatus(
+            rate_limiter_active=True,
+            security_headers=True,
+            gzip_compression=True,
+            rbac_auth=True
+        )
+    )
 
-@app.get("/", tags=["System"])
-async def root():
-    return {
-        "message": f"Welcome to {settings.PROJECT_NAME}",
-        "docs_url": "/docs",
-        "api_prefix": settings.API_V1_STR,
-        "helplines": {
+@app.get("/", response_model=RootResponse, tags=["System"])
+async def root() -> RootResponse:
+    """Root discovery endpoint providing links and national helpline matrix."""
+    return RootResponse(
+        message=f"Welcome to {settings.PROJECT_NAME}",
+        docs_url="/docs",
+        api_prefix=settings.API_V1_STR,
+        helplines={
             "national_emergency": 112,
             "ambulance_trauma": 108,
             "fire_rescue": 101,
             "police_highway": 100
         }
-    }
+    )
