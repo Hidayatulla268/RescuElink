@@ -20,6 +20,12 @@ interface IncidentMapProps {
   onSelectUnit?: (unit: ResponderUnit) => void;
 }
 
+type HoveredMapNode = 
+  | { type: 'hospital'; data: Hospital; x: number; y: number }
+  | { type: 'signal'; data: TrafficSignal; x: number; y: number }
+  | { type: 'incident'; data: Incident; x: number; y: number }
+  | { type: 'unit'; data: ResponderUnit; x: number; y: number };
+
 export const IncidentMap: React.FC<IncidentMapProps> = ({
   incidents,
   units,
@@ -49,7 +55,7 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
   const [showSignals, setShowSignals] = useState<boolean>(true);
   const [radarSweepEnabled, setRadarSweepEnabled] = useState<boolean>(true);
   const [mapStyle, setMapStyle] = useState<'tactical' | 'satellite'>('satellite');
-  const [hoveredNode, setHoveredNode] = useState<any>(null);
+  const [hoveredNode, setHoveredNode] = useState<HoveredMapNode | null>(null);
 
   // Convert (lat, lng) to SVG viewBox coordinates (width: 1000, height: 700)
   const project = (lat: number, lng: number) => {

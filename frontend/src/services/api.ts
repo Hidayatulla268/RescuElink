@@ -151,10 +151,10 @@ export const api = {
 
 export class RealtimeClient {
   private ws: WebSocket | null = null;
-  private onMessageCallback: ((event: string, data: any) => void) | null = null;
-  private reconnectTimer: any = null;
+  private onMessageCallback: ((event: string, data: Record<string, unknown>) => void) | null = null;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(onMessage: (event: string, data: any) => void) {
+  constructor(onMessage: (event: string, data: Record<string, unknown>) => void) {
     this.onMessageCallback = onMessage;
     this.connect();
   }
