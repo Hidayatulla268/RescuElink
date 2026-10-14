@@ -12,11 +12,47 @@ import {
   GreenCorridorTransitRequest,
   GreenCorridorTransitSession,
   CitizenSnapReport,
-  AutoScrambleResult
+  AutoScrambleResult,
+  RoadSegment,
+  HospitalRoutingRequest,
+  HospitalRoutingResponse,
+  DriverRouteAcceptanceRequest,
+  DriverRouteAcceptanceResponse
 } from '../types';
 
-const API_BASE = 'http://localhost:8000/api/v1';
-const WS_BASE = 'ws://localhost:8000/api/v1/ws/events';
+function getApiBase(): string {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl) {
+    return envUrl.endsWith('/api/v1') ? envUrl : `${envUrl.replace(/\/$/, '')}/api/v1`;
+  }
+  if (typeof window !== 'undefined') {
+    // In development mode on Vite dev server port 5173/3000, target default backend port 8000
+    if (window.location.port === '5173' || window.location.port === '3000') {
+      return 'http://localhost:8000/api/v1';
+    }
+    // In production (same origin or reverse proxy)
+    return `${window.location.origin}/api/v1`;
+  }
+  return 'http://localhost:8000/api/v1';
+}
+
+function getWsBase(): string {
+  const envWs = import.meta.env.VITE_WS_URL;
+  if (envWs) return envWs;
+
+  if (typeof window !== 'undefined') {
+    if (window.location.port === '5173' || window.location.port === '3000') {
+      return 'ws://localhost:8000/api/v1/ws/events';
+    }
+    const wsProto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${wsProto}//${window.location.host}/api/v1/ws/events`;
+  }
+  return 'ws://localhost:8000/api/v1/ws/events';
+}
+
+export const API_BASE = getApiBase();
+export const WS_BASE = getWsBase();
+
 
 export interface DispatchUnitsResponse {
   incident_id: string;
@@ -211,6 +247,34 @@ export const api = {
       localStorage.setItem('rescuenlink_gov_user', JSON.stringify(data.user));
     }
     return data;
+  },
+
+  async getHospitalRouting(payload: HospitalRoutingRequest): Promise<HospitalRoutingResponse> {
+    const res = await fetch(`${API_BASE}/routing/nearest-hospital`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`Failed to calculate hospital routes: ${res.statusText}`);
+    return res.json();
+  },
+
+  async getRoadsTraffic(): Promise<RoadSegment[]> {
+    const res = await fetch(`${API_BASE}/routing/roads`, {
+      headers: getAuthHeaders()
+    });
+    if (!res.ok) throw new Error(`Failed to fetch road network traffic: ${res.statusText}`);
+    return res.json();
+  },
+
+  async driverAcceptRoute(payload: DriverRouteAcceptanceRequest): Promise<DriverRouteAcceptanceResponse> {
+    const res = await fetch(`${API_BASE}/routing/driver/accept-route`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`Failed to accept route: ${res.statusText}`);
+    return res.json();
   }
 };
 

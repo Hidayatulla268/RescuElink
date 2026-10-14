@@ -1,0 +1,6 @@
+# RescuELINK Autonomous Emergency Command Platform
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /docs
+Disallow: /redoc

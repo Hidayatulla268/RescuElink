@@ -12,10 +12,13 @@ from datetime import datetime, timezone
 from typing import Optional, Dict, Any, List
 from pydantic import BaseModel, Field
 
+import os
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+
 
 from app.config import settings
 from app.api.incidents import router as incidents_router
@@ -264,6 +267,7 @@ app.include_router(analytics_router, prefix=settings.API_V1_STR, tags=["Analytic
 app.include_router(ws_router, prefix=settings.API_V1_STR, tags=["Realtime WebSocket"])
 
 @app.get("/health", response_model=HealthCheckResponse, tags=["System"])
+@app.get("/api/health", response_model=HealthCheckResponse, tags=["System"])
 async def health_check() -> HealthCheckResponse:
     """System health check and environmental status."""
     return HealthCheckResponse(
@@ -280,8 +284,10 @@ async def health_check() -> HealthCheckResponse:
         )
     )
 
-@app.get("/", response_model=RootResponse, tags=["System"])
-async def root() -> RootResponse:
+# --- Production API Discovery & Static Serving ---
+@app.get("/api", response_model=RootResponse, tags=["System"])
+@app.get(f"{settings.API_V1_STR}", response_model=RootResponse, tags=["System"])
+async def api_root() -> RootResponse:
     """Root discovery endpoint providing links and national helpline matrix."""
     return RootResponse(
         message=f"Welcome to {settings.PROJECT_NAME}",
@@ -294,3 +300,60 @@ async def root() -> RootResponse:
             "police_highway": 100
         }
     )
+
+# Production Static Files & React SPA Routing
+frontend_dist = os.path.abspath(settings.FRONTEND_DIST_DIR)
+assets_dir = os.path.join(frontend_dist, "assets")
+
+if os.path.isdir(frontend_dist):
+    if os.path.isdir(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.get("/manifest.json", include_in_schema=False)
+    async def serve_manifest():
+        manifest_path = os.path.join(frontend_dist, "manifest.json")
+        if os.path.isfile(manifest_path):
+            return FileResponse(manifest_path, media_type="application/manifest+json")
+        raise HTTPException(status_code=404, detail="Manifest not found")
+
+    @app.get("/robots.txt", include_in_schema=False)
+    async def serve_robots():
+        robots_path = os.path.join(frontend_dist, "robots.txt")
+        if os.path.isfile(robots_path):
+            return FileResponse(robots_path, media_type="text/plain")
+        raise HTTPException(status_code=404, detail="Robots not found")
+
+    @app.get("/favicon.svg", include_in_schema=False)
+    async def serve_favicon():
+        fav_path = os.path.join(frontend_dist, "favicon.svg")
+        if os.path.isfile(fav_path):
+            return FileResponse(fav_path, media_type="image/svg+xml")
+        raise HTTPException(status_code=404, detail="Favicon not found")
+
+    @app.get("/", include_in_schema=False)
+    async def serve_root_page():
+        index_file = os.path.join(frontend_dist, "index.html")
+        if os.path.isfile(index_file):
+            return FileResponse(index_file, media_type="text/html")
+        return await api_root()
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa_route(full_path: str):
+        # Pass-through API, docs, or health requests to 404 handler if unhandled
+        if full_path.startswith("api") or full_path in ["health", "docs", "redoc", "openapi.json"]:
+            raise HTTPException(status_code=404, detail="Endpoint not found")
+
+        exact_file = os.path.join(frontend_dist, full_path)
+        if os.path.isfile(exact_file):
+            return FileResponse(exact_file)
+
+        index_file = os.path.join(frontend_dist, "index.html")
+        if os.path.isfile(index_file):
+            return FileResponse(index_file, media_type="text/html")
+
+        raise HTTPException(status_code=404, detail="Resource not found")
+else:
+    @app.get("/", response_model=RootResponse, tags=["System"])
+    async def root() -> RootResponse:
+        return await api_root()
+

@@ -12,8 +12,10 @@ from starlette.responses import Response, JSONResponse
 from fastapi import HTTPException, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
+import os
+
 # Cryptographic secret for signing Government Badges & Role verification tokens
-SECRET_KEY = "rescuenlink-production-gov-secret-key-super-secure"
+SECRET_KEY = os.getenv("SECRET_KEY", "rescuenlink-production-gov-secret-key-super-secure")
 TOKEN_VALIDITY_SECONDS = 86400  # 24 hours
 
 # In-memory sliding window rate limiter: { client_ip: [(timestamp1), (timestamp2)...] }
@@ -22,6 +24,7 @@ RATE_LIMIT_WINDOW = 60.0  # seconds
 MAX_REQUESTS_PER_WINDOW = 120  # requests per minute per IP
 
 security_scheme = HTTPBearer(auto_error=False)
+
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -62,9 +65,15 @@ class RateLimiterMiddleware(BaseHTTPMiddleware):
     brute force, and API abuse. Injects standard X-RateLimit headers.
     """
     async def dispatch(self, request: Request, call_next) -> Response:
-        # Exclude documentation and static/health checks from strict rate limiting
-        if request.url.path in ["/health", "/docs", "/openapi.json", "/"]:
+        # Exclude documentation, static assets, and health checks from strict API rate limiting
+        path = request.url.path
+        if (
+            path in ["/health", "/docs", "/openapi.json", "/redoc", "/", "/manifest.json", "/robots.txt", "/favicon.svg", "/favicon.ico"]
+            or path.startswith("/assets/")
+            or not path.startswith("/api/")
+        ):
             return await call_next(request)
+
 
         client_ip = request.client.host if request.client else "127.0.0.1"
         now = time.time()

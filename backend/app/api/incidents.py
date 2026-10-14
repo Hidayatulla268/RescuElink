@@ -7,11 +7,14 @@ from app.models.schemas import (
     ResponderUnit, IoTSensor, DispatchActionRequest, CitizenBroadcastRequest,
     CitizenBroadcastResponse, UnitStatus, Hospital, TrafficSignal,
     GreenCorridorTransitRequest, GreenCorridorTransitSession,
-    CitizenSnapReport, AutoScrambleResult
+    CitizenSnapReport, AutoScrambleResult, RoadSegment,
+    HospitalRoutingRequest, HospitalRoutingResponse,
+    DriverRouteAcceptanceRequest, DriverRouteAcceptanceResponse
 )
 from app.services.mock_db import db
 from app.services.gemini_service import gemini_service
 from app.services.dispatch_engine import dispatch_engine
+from app.services.routing_engine import routing_engine
 from app.api.websocket import manager
 from app.core.security import sanitize_input_text
 
@@ -73,7 +76,7 @@ async def create_incident(payload: IncidentCreate, background_tasks: BackgroundT
         raw_description=clean_desc,
         location_address=clean_addr,
         coordinates=payload.coordinates,
-        image_url=payload.image_base64[:100] + "..." if payload.image_base64 else None,
+        image_url=payload.image_base64 if payload.image_base64 else None,
         status=IncidentStatus.REPORTED,
         priority=triage_result.priority,
         category=triage_result.category,
@@ -359,7 +362,7 @@ async def report_accident_by_photo(
         raw_description=clean_notes or "Roadway crash reported via citizen photo capture.",
         location_address=clean_addr,
         coordinates=payload.coordinates,
-        image_url=payload.image_base64[:100] + "..." if payload.image_base64 else None,
+        image_url=payload.image_base64 if payload.image_base64 else None,
         status=IncidentStatus.DISPATCHED,
         priority=priority,
         category=triage_result.category,
@@ -401,3 +404,71 @@ async def report_accident_by_photo(
         triage_summary=triage_result.reasoning_summary,
         available_hospitals=list(db.hospitals.values())
     )
+
+
+# --- Shortest Path, Nearest Hospital & Traffic-Free Road Routing Endpoints ---
+
+@router.post("/routing/nearest-hospital", response_model=HospitalRoutingResponse)
+async def get_nearest_hospital_routing(payload: HospitalRoutingRequest):
+    """
+    Finds shortest path for nearest hospital, computes route options (AI Green Corridor,
+    Traffic-Free Bypass, Shortest Distance Path), and returns live traffic road states.
+    """
+    clean_addr = sanitize_input_text(payload.pickup_address)
+    clean_cond = sanitize_input_text(payload.patient_condition)
+    return routing_engine.calculate_hospital_routes(
+        pickup_address=clean_addr,
+        pickup_coordinates=payload.pickup_coordinates,
+        ambulance_id=payload.ambulance_id,
+        patient_condition=clean_cond
+    )
+
+
+@router.get("/routing/roads", response_model=List[RoadSegment])
+async def list_road_traffic_conditions():
+    """
+    Retrieve all metropolitan roadway segments with live traffic congestion telemetry,
+    including designated traffic-free elevated expressways, bypasses, and choke points.
+    """
+    return list(db.road_segments.values())
+
+
+@router.post("/routing/driver/accept-route", response_model=DriverRouteAcceptanceResponse)
+async def driver_accept_route(
+    payload: DriverRouteAcceptanceRequest,
+    background_tasks: BackgroundTasks
+):
+    """
+    Allows the ambulance driver / pilot to accept the recommended route or choose an alternative
+    (e.g., Traffic-Free Bypass or Shortest Distance Path).
+    Updates corridor signals, adjusts hospital ER arrival ETA, and notifies operations.
+    """
+    clean_addr = sanitize_input_text(payload.pickup_address)
+    clean_cond = sanitize_input_text(payload.patient_condition)
+    clean_notes = sanitize_input_text(payload.driver_notes)
+
+    response = routing_engine.driver_accept_route(
+        ambulance_id=payload.ambulance_id,
+        destination_hospital_id=payload.destination_hospital_id,
+        chosen_route_id=payload.chosen_route_id,
+        pickup_address=clean_addr,
+        pickup_coordinates=payload.pickup_coordinates,
+        patient_condition=clean_cond,
+        driver_notes=clean_notes
+    )
+
+    background_tasks.add_task(
+        manager.broadcast,
+        "DRIVER_ROUTE_ACCEPTED",
+        {
+            "ambulance_id": response.ambulance_id,
+            "hospital_name": response.hospital_name,
+            "chosen_route_name": response.chosen_route_name,
+            "eta_minutes": response.eta_minutes,
+            "distance_km": response.distance_km,
+            "signals_preempted": response.signals_preempted
+        }
+    )
+
+    return response
+

@@ -136,9 +136,83 @@ def run_tests():
         metrics = res.json()
         print(f"14. [PASS] Urban Resilience Score: {metrics['overall_city_resilience_score']}/100")
 
+        # 15. Production Webpage Serving & PWA Manifest
+        res_root = client.get("/")
+        assert res_root.status_code == 200
+        assert "text/html" in res_root.headers.get("content-type", "")
+        assert "RescuELINK" in res_root.text
+        
+        res_m = client.get("/manifest.json")
+        assert res_m.status_code == 200
+        assert res_m.json()["short_name"] == "RescuELINK"
+        print("15. [PASS] Production Website & PWA: Serves production HTML and valid web app manifest.")
+
+        # 16. SPA Client-Side Routing Fallback & API Root Discovery
+        res_spa = client.get("/corridor/active")
+        assert res_spa.status_code == 200
+        assert "text/html" in res_spa.headers.get("content-type", "")
+        
+        res_api = client.get("/api")
+        assert res_api.status_code == 200
+        assert res_api.json()["helplines"]["national_emergency"] == 112
+        print("16. [PASS] SPA Client-Side Route Fallback: Verified deep-link routing and API discovery root.")
+
+        # 17. Nearest Hospital & Multi-Route Path Optimization
+        route_req = {
+            "pickup_address": "Silk Board Junction, Hosur Rd & ORR Crossing",
+            "pickup_coordinates": {"lat": 12.9180, "lng": 77.6240},
+            "ambulance_id": "unit-ems-101",
+            "patient_condition": "Acute Traumatic Brain Injury"
+        }
+        res_routing = client.post("/api/v1/routing/nearest-hospital", json=route_req)
+        assert res_routing.status_code == 200, f"Routing failed: {res_routing.text}"
+        routing_data = res_routing.json()
+        assert "nearest_hospital" in routing_data
+        assert "recommended_hospital" in routing_data
+        assert len(routing_data["all_hospitals"]) >= 4
+        nearest_hosp = routing_data["nearest_hospital"]
+        assert len(nearest_hosp["route_options"]) == 3
+        # Ensure Route A (AI Green Corridor), Route B (Traffic-Free Bypass), Route C (Shortest Distance) exist
+        route_types = [r["route_type"] for r in nearest_hosp["route_options"]]
+        assert "AI_GREEN_CORRIDOR" in route_types
+        assert "TRAFFIC_FREE_BYPASS" in route_types
+        assert "SHORTEST_DISTANCE" in route_types
+        print(f"17. [PASS] Nearest Hospital & Multi-Route Path Optimization: Nearest is {nearest_hosp['hospital']['name']} ({nearest_hosp['distance_km']} km). 3 Route alternatives calculated.")
+
+        # 18. Traffic-Free Roads & Congestion Telemetry
+        res_roads = client.get("/api/v1/routing/roads")
+        assert res_roads.status_code == 200, f"Roads failed: {res_roads.text}"
+        roads = res_roads.json()
+        assert len(roads) >= 6
+        traffic_free_roads = [r for r in roads if r["is_traffic_free"]]
+        congested_roads = [r for r in roads if not r["is_traffic_free"]]
+        assert len(traffic_free_roads) >= 3
+        assert len(congested_roads) >= 2
+        print(f"18. [PASS] Traffic-Free Roadways Telemetry: {len(traffic_free_roads)} Traffic-Free corridors active, {len(congested_roads)} congested bottlenecks tracked.")
+
+        # 19. Driver Route Acceptance & In-Cab Terminal Sync
+        accept_payload = {
+            "ambulance_id": "unit-ems-101",
+            "destination_hospital_id": nearest_hosp["hospital"]["id"],
+            "chosen_route_id": "route-traffic-free-bypass",
+            "pickup_address": "Silk Board Junction",
+            "pickup_coordinates": {"lat": 12.9180, "lng": 77.6240},
+            "patient_condition": "Acute Traumatic Brain Injury",
+            "driver_notes": "Pilot Rajesh accepted Traffic-Free Elevated Bypass for spine stabilization"
+        }
+        res_accept = client.post("/api/v1/routing/driver/accept-route", json=accept_payload)
+        assert res_accept.status_code == 200, f"Driver accept failed: {res_accept.text}"
+        accept_data = res_accept.json()
+        assert accept_data["success"] is True
+        assert accept_data["chosen_route_id"] == "route-traffic-free-bypass"
+        assert accept_data["eta_minutes"] > 0
+        print(f"19. [PASS] Driver Route Acceptance: Pilot Rajesh accepted '{accept_data['chosen_route_name']}' to {accept_data['hospital_name']}.")
+
         print("\n=========================================================================")
-        print(">>> ALL 14 SECURITY, EFFICIENCY & GREEN CORRIDOR TESTS PASSED (100%) <<<")
+        print(">>> ALL 19 SECURITY, PRODUCTION SERVING & DISPATCH TESTS PASSED (100%) <<<")
         print("=========================================================================")
 
 if __name__ == "__main__":
     run_tests()
+
+

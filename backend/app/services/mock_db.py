@@ -5,7 +5,7 @@ from app.models.schemas import (
     Incident, IncidentCreate, IncidentStatus, PriorityLevel, IncidentCategory,
     Coordinates, ResponderUnit, UnitType, UnitStatus, IoTSensor, SensorType,
     SensorAlertStatus, AITriageResult, Hospital, TrafficSignal, TrafficSignalState,
-    GreenCorridorTransitSession
+    GreenCorridorTransitSession, RoadSegment, RoadCongestionLevel
 )
 
 class Database:
@@ -16,6 +16,7 @@ class Database:
         self.hospitals: Dict[str, Hospital] = {}
         self.traffic_signals: Dict[str, TrafficSignal] = {}
         self.active_corridors: Dict[str, GreenCorridorTransitSession] = {}
+        self.road_segments: Dict[str, RoadSegment] = {}
         self._seed_initial_data()
 
     def _seed_initial_data(self):
@@ -450,5 +451,107 @@ class Database:
         ]
         for s in initial_signals:
             self.traffic_signals[s.id] = s
+
+        # 6. Seed Metropolitan Road Network & Live Traffic Congestion Profiles
+        initial_roads = [
+            RoadSegment(
+                id="road-hosur-elevated",
+                name="Hosur Rd & Electronics City Elevated Expressway (NH-44)",
+                corridor_type="ELEVATED_EXPRESSWAY",
+                congestion_level=RoadCongestionLevel.TRAFFIC_FREE,
+                current_speed_kmh=74.0,
+                is_traffic_free=True,
+                delay_minutes=0.0,
+                coordinates_start=Coordinates(lat=12.9180, lng=77.6240),
+                coordinates_end=Coordinates(lat=12.8450, lng=77.6630),
+                description="Elevated tollway completely bypassing Silk Board surface choke points. High-speed emergency transit."
+            ),
+            RoadSegment(
+                id="road-orr-arterial",
+                name="Outer Ring Road (ORR) Arterial Spine (Hebbal - Bellandur - Silk Board)",
+                corridor_type="RING_ROAD_BYPASS",
+                congestion_level=RoadCongestionLevel.TRAFFIC_FREE,
+                current_speed_kmh=66.0,
+                is_traffic_free=True,
+                delay_minutes=0.5,
+                coordinates_start=Coordinates(lat=12.9180, lng=77.6240),
+                coordinates_end=Coordinates(lat=12.9560, lng=77.7010),
+                description="Dedicated rapid transit lanes pre-cleared for first responders with smart signal priority."
+            ),
+            RoadSegment(
+                id="road-nice-ring",
+                name="NICE Bangalore Elevated Peripheral Ring Road Bypass",
+                corridor_type="ELEVATED_EXPRESSWAY",
+                congestion_level=RoadCongestionLevel.TRAFFIC_FREE,
+                current_speed_kmh=82.0,
+                is_traffic_free=True,
+                delay_minutes=0.0,
+                coordinates_start=Coordinates(lat=12.8700, lng=77.5600),
+                coordinates_end=Coordinates(lat=12.9200, lng=77.6600),
+                description="Peripheral tollway bypass avoiding urban street friction. Zero traffic light interruptions."
+            ),
+            RoadSegment(
+                id="road-hebbal-airport",
+                name="Hebbal Flyover & Kempegowda Airport Expressway (NH-44 North)",
+                corridor_type="ELEVATED_EXPRESSWAY",
+                congestion_level=RoadCongestionLevel.TRAFFIC_FREE,
+                current_speed_kmh=78.0,
+                is_traffic_free=True,
+                delay_minutes=0.0,
+                coordinates_start=Coordinates(lat=13.0350, lng=77.5910),
+                coordinates_end=Coordinates(lat=13.1100, lng=77.6100),
+                description="Multi-lane elevated highway with continuous unobstructed flow toward North Bengaluru hospitals."
+            ),
+            RoadSegment(
+                id="road-inner-ring",
+                name="Indiranagar 100ft Road & Inner Ring Road (IRR) Corridor",
+                corridor_type="ARTERIAL",
+                congestion_level=RoadCongestionLevel.MODERATE,
+                current_speed_kmh=38.0,
+                is_traffic_free=False,
+                delay_minutes=3.2,
+                coordinates_start=Coordinates(lat=12.9785, lng=77.6410),
+                coordinates_end=Coordinates(lat=12.9350, lng=77.6240),
+                description="Secondary commercial arterial with intermediate signal cycling and moderate vehicle density."
+            ),
+            RoadSegment(
+                id="road-old-airport",
+                name="Old Airport Road (HAL Arterial - Domlur to Manipal)",
+                corridor_type="ARTERIAL",
+                congestion_level=RoadCongestionLevel.MODERATE,
+                current_speed_kmh=42.0,
+                is_traffic_free=False,
+                delay_minutes=2.5,
+                coordinates_start=Coordinates(lat=12.9600, lng=77.6400),
+                coordinates_end=Coordinates(lat=12.9580, lng=77.6580),
+                description="Direct corridor to Manipal Hospital with dedicated ambulance priority lane."
+            ),
+            RoadSegment(
+                id="road-silkboard-surface",
+                name="Silk Board Central Surface Junction (Hosur Rd & ORR Ground Level)",
+                corridor_type="SURFACE_JUNCTION",
+                congestion_level=RoadCongestionLevel.HEAVY_GRIDLOCK,
+                current_speed_kmh=9.0,
+                is_traffic_free=False,
+                delay_minutes=11.5,
+                coordinates_start=Coordinates(lat=12.9175, lng=77.6235),
+                coordinates_end=Coordinates(lat=12.9240, lng=77.6220),
+                description="Heavy metropolitan bottleneck. Subject to severe queueing without Green Corridor automated signal preemption."
+            ),
+            RoadSegment(
+                id="road-mg-brigade",
+                name="MG Road & Brigade Road Commercial Boulevard",
+                corridor_type="SURFACE_JUNCTION",
+                congestion_level=RoadCongestionLevel.MODERATE,
+                current_speed_kmh=32.0,
+                is_traffic_free=False,
+                delay_minutes=4.0,
+                coordinates_start=Coordinates(lat=12.9740, lng=77.6070),
+                coordinates_end=Coordinates(lat=12.9630, lng=77.5740),
+                description="Central commercial corridor connecting downtown metro stations and Victoria Trauma Pavilion."
+            )
+        ]
+        for r in initial_roads:
+            self.road_segments[r.id] = r
 
 db = Database()

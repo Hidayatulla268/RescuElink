@@ -271,3 +271,94 @@ export interface GovernmentUser {
   loggedAt: string;
 }
 
+// --- Shortest Path, Hospital Routing & Traffic-Free Roads Types ---
+
+export type RoadCongestionLevel = 'TRAFFIC_FREE' | 'MODERATE' | 'HEAVY_GRIDLOCK';
+
+export interface RoadSegment {
+  id: string;
+  name: string;
+  corridor_type: string;
+  congestion_level: RoadCongestionLevel;
+  current_speed_kmh: number;
+  is_traffic_free: bool | boolean;
+  delay_minutes: number;
+  coordinates_start: Coordinates;
+  coordinates_end: Coordinates;
+  description: string;
+}
+
+export interface HospitalRouteOption {
+  route_id: string;
+  route_name: string;
+  route_type: 'AI_GREEN_CORRIDOR' | 'TRAFFIC_FREE_BYPASS' | 'SHORTEST_DISTANCE' | string;
+  is_recommended: boolean;
+  distance_km: number;
+  estimated_minutes_normal: number;
+  estimated_minutes_preempted: number;
+  time_saved_minutes: number;
+  congestion_score_pct: number;
+  traffic_free_pct: number;
+  signals_count: number;
+  signals_preempted_count: number;
+  via_roads: string[];
+  waypoints: Coordinates[];
+  driver_pros: string[];
+  driver_cons: string[];
+}
+
+export interface HospitalRecommendation {
+  hospital: Hospital;
+  distance_km: number;
+  shortest_travel_time_minutes: number;
+  trauma_bay_ready: boolean;
+  icu_available: number;
+  bed_availability_score: number;
+  overall_score: number;
+  is_nearest: boolean;
+  is_recommended: boolean;
+  route_options: HospitalRouteOption[];
+}
+
+export interface HospitalRoutingRequest {
+  pickup_address: string;
+  pickup_coordinates: Coordinates;
+  ambulance_id?: string;
+  patient_condition?: string;
+}
+
+export interface HospitalRoutingResponse {
+  pickup_address: string;
+  pickup_coordinates: Coordinates;
+  nearest_hospital: HospitalRecommendation;
+  recommended_hospital: HospitalRecommendation;
+  all_hospitals: HospitalRecommendation[];
+  active_traffic_free_roads: RoadSegment[];
+  congested_roads: RoadSegment[];
+}
+
+export interface DriverRouteAcceptanceRequest {
+  ambulance_id: string;
+  destination_hospital_id: string;
+  chosen_route_id: string;
+  pickup_address: string;
+  pickup_coordinates: Coordinates;
+  patient_condition?: string;
+  driver_notes?: string;
+}
+
+export interface DriverRouteAcceptanceResponse {
+  success: boolean;
+  message: string;
+  ambulance_id: string;
+  hospital_id: string;
+  hospital_name: string;
+  chosen_route_id: string;
+  chosen_route_name: string;
+  eta_minutes: number;
+  distance_km: number;
+  signals_preempted: number;
+  session: GreenCorridorTransitSession;
+}
+
+

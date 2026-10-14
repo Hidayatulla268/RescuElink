@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  rescuenlink:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rescuenlink-production
+    restart: always
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      - ENVIRONMENT=production
+      - HOST=0.0.0.0
+      - PORT=8000
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-3.8-flash}
+      - SECRET_KEY=${SECRET_KEY:-rescuenlink-production-gov-secret-key-super-secure}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"

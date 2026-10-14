@@ -277,3 +277,106 @@ class AutoScrambleResult(BaseModel):
     auto_dispatched_at: str
     triage_summary: str
     available_hospitals: List[Hospital]
+
+
+# --- Shortest Path, Hospital Routing & Traffic-Free Road Models ---
+
+class RoadCongestionLevel(str, Enum):
+    """Traffic congestion grading across metropolitan roadway segments."""
+    TRAFFIC_FREE = "TRAFFIC_FREE"          # Green flow (> 60 km/h, 0-20% congestion)
+    MODERATE = "MODERATE"                  # Yellow flow (30-50 km/h, 20-60% congestion)
+    HEAVY_GRIDLOCK = "HEAVY_GRIDLOCK"      # Red gridlock (< 15 km/h, > 60% congestion)
+
+
+class RoadSegment(BaseModel):
+    """Metropolitan road corridor segment with live traffic congestion telemetry."""
+    id: str = Field(..., description="Unique road segment identifier")
+    name: str = Field(..., description="Road or highway corridor name")
+    corridor_type: str = Field(..., description="ELEVATED_EXPRESSWAY, RING_ROAD_BYPASS, ARTERIAL, or SURFACE_JUNCTION")
+    congestion_level: RoadCongestionLevel = Field(..., description="Live traffic congestion level")
+    current_speed_kmh: float = Field(..., description="Observed traffic speed in km/h")
+    is_traffic_free: bool = Field(..., description="True if free-flowing without bottleneck delays")
+    delay_minutes: float = Field(default=0.0, description="Estimated delay relative to free flow")
+    coordinates_start: Coordinates = Field(..., description="Segment start GPS coordinate")
+    coordinates_end: Coordinates = Field(..., description="Segment end GPS coordinate")
+    description: str = Field(default="", description="Traffic condition summary")
+
+
+class HospitalRouteOption(BaseModel):
+    """Route option calculated from incident pickup to receiving trauma hospital."""
+    route_id: str = Field(..., description="Unique route option identifier (e.g., route-green-corridor)")
+    route_name: str = Field(..., description="Display route title")
+    route_type: str = Field(..., description="AI_GREEN_CORRIDOR, TRAFFIC_FREE_BYPASS, or SHORTEST_DISTANCE")
+    is_recommended: bool = Field(default=False, description="Whether AI recommends this as the optimal choice")
+    distance_km: float = Field(..., description="Total route distance in kilometers")
+    estimated_minutes_normal: float = Field(..., description="Transit time under regular traffic")
+    estimated_minutes_preempted: float = Field(..., description="Transit time with Green Corridor AI preemption")
+    time_saved_minutes: float = Field(..., description="Time saved compared to normal transit")
+    congestion_score_pct: int = Field(..., description="Congestion percentage (0% = totally traffic free)")
+    traffic_free_pct: int = Field(..., description="Percentage of route consisting of traffic-free roads")
+    signals_count: int = Field(..., description="Number of traffic signals on this route")
+    signals_preempted_count: int = Field(..., description="Number of signals cleared to 100% GREEN")
+    via_roads: List[str] = Field(default_factory=list, description="Sequence of road segments traversed")
+    waypoints: List[Coordinates] = Field(default_factory=list, description="GPS waypoints along the route polyline")
+    driver_pros: List[str] = Field(default_factory=list, description="Operational advantages for driver")
+    driver_cons: List[str] = Field(default_factory=list, description="Trade-offs or considerations for driver")
+
+
+class HospitalRecommendation(BaseModel):
+    """Hospital candidate ranked by distance, travel time, ER beds, and route options."""
+    hospital: Hospital
+    distance_km: float
+    shortest_travel_time_minutes: float
+    trauma_bay_ready: bool
+    icu_available: int
+    bed_availability_score: int
+    overall_score: float
+    is_nearest: bool
+    is_recommended: bool
+    route_options: List[HospitalRouteOption]
+
+
+class HospitalRoutingRequest(BaseModel):
+    """Request payload to calculate nearest hospital and multiple route paths."""
+    pickup_address: str = Field(..., description="Patient / accident pickup address")
+    pickup_coordinates: Coordinates = Field(..., description="Pickup GPS coordinates")
+    ambulance_id: Optional[str] = Field(default=None, description="Active ambulance unit ID")
+    patient_condition: Optional[str] = Field(default="Severe Trauma / Polytrauma", description="Patient status")
+
+
+class HospitalRoutingResponse(BaseModel):
+    """Complete routing recommendation with nearest hospital, alternatives & traffic roads."""
+    pickup_address: str
+    pickup_coordinates: Coordinates
+    nearest_hospital: HospitalRecommendation
+    recommended_hospital: HospitalRecommendation
+    all_hospitals: List[HospitalRecommendation]
+    active_traffic_free_roads: List[RoadSegment]
+    congested_roads: List[RoadSegment]
+
+
+class DriverRouteAcceptanceRequest(BaseModel):
+    """Payload sent when ambulance driver accepts or changes their active transit route."""
+    ambulance_id: str
+    destination_hospital_id: str
+    chosen_route_id: str
+    pickup_address: str
+    pickup_coordinates: Coordinates
+    patient_condition: Optional[str] = "Acute Trauma"
+    driver_notes: Optional[str] = "Confirmed on In-Cab Terminal by Ambulance Driver"
+
+
+class DriverRouteAcceptanceResponse(BaseModel):
+    """Response returned upon driver route confirmation."""
+    success: bool
+    message: str
+    ambulance_id: str
+    hospital_id: str
+    hospital_name: str
+    chosen_route_id: str
+    chosen_route_name: str
+    eta_minutes: float
+    distance_km: float
+    signals_preempted: int
+    session: GreenCorridorTransitSession
+

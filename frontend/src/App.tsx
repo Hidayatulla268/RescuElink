@@ -15,7 +15,8 @@ import { MobileAppView } from './components/MobileAppView';
 import { CitizenPublicView } from './components/CitizenPublicView';
 import { 
   Incident, ResponderUnit, IoTSensor, Hospital, TrafficSignal, 
-  GreenCorridorTransitSession, AutoScrambleResult, GovernmentUser, ViewMode 
+  GreenCorridorTransitSession, AutoScrambleResult, GovernmentUser, ViewMode,
+  RoadSegment, HospitalRouteOption
 } from './types';
 import { api, RealtimeClient } from './services/api';
 
@@ -31,6 +32,8 @@ export const App: React.FC = () => {
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [trafficSignals, setTrafficSignals] = useState<TrafficSignal[]>([]);
   const [activeCorridor, setActiveCorridor] = useState<GreenCorridorTransitSession | null>(null);
+  const [trafficRoads, setTrafficRoads] = useState<RoadSegment[]>([]);
+  const [selectedRouteForMap, setSelectedRouteForMap] = useState<HospitalRouteOption | null>(null);
   
   // Highlighted incident on Map vs Inspected incident in Modal
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
@@ -46,18 +49,20 @@ export const App: React.FC = () => {
   // Initial Data Load
   const loadData = useCallback(async () => {
     try {
-      const [incList, unitList, sensorList, hospList, sigList] = await Promise.all([
+      const [incList, unitList, sensorList, hospList, sigList, roadsList] = await Promise.all([
         api.getIncidents(),
         api.getUnits(),
         api.getSensors(),
         api.getHospitals(),
-        api.getTrafficSignals()
+        api.getTrafficSignals(),
+        api.getRoadsTraffic()
       ]);
       setIncidents(incList);
       setUnits(unitList);
       setSensors(sensorList);
       setHospitals(hospList);
       setTrafficSignals(sigList);
+      setTrafficRoads(roadsList);
 
       // Default select the first P1 incident for map focus only if none selected
       setSelectedIncident(prev => {
@@ -206,6 +211,7 @@ export const App: React.FC = () => {
           trafficSignals={trafficSignals}
           activeCorridor={activeCorridor}
           governmentUser={governmentUser}
+          trafficRoads={trafficRoads}
           onOpenInspect={handleOpenInspect}
           onOpenNewIncident={() => setIsNewIncidentOpen(true)}
           onOpenSnapAccident={() => setIsSnapModalOpen(true)}
@@ -223,6 +229,7 @@ export const App: React.FC = () => {
           hospitals={hospitals}
           trafficSignals={trafficSignals}
           activeCorridor={activeCorridor}
+          trafficRoads={trafficRoads}
           onOpenNewIncident={() => setIsNewIncidentOpen(true)}
           onOpenSnapAccident={() => setIsSnapModalOpen(true)}
           onOpenGovLogin={() => setIsGovLoginOpen(true)}
@@ -242,8 +249,8 @@ export const App: React.FC = () => {
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-neon-green" />
               <span className="text-white font-bold">
                 {governmentUser 
-                  ? `Authorized Personnel: ${governmentUser.fullName} (${governmentUser.badgeNumber}) — ${governmentUser.roleTitle}`
-                  : 'Operator Console Preview Mode (Demo View)'}
+                  ? `Authenticated Officer: ${governmentUser.fullName} (${governmentUser.badgeNumber}) — ${governmentUser.roleTitle}`
+                  : 'Municipal Emergency Grid — Operational Dispatch Monitor'}
               </span>
             </div>
             <button
@@ -253,8 +260,9 @@ export const App: React.FC = () => {
               }}
               className="text-[11px] px-3 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-cyan-300 border border-white/15 transition"
             >
-              Return to Citizen Public Webpage
+              Return to Citizen Portal
             </button>
+
           </div>
 
           {activeTab === 'command' && (
@@ -278,6 +286,8 @@ export const App: React.FC = () => {
                   hospitals={hospitals}
                   trafficSignals={trafficSignals}
                   activeCorridor={activeCorridor}
+                  selectedRoute={selectedRouteForMap}
+                  trafficRoads={trafficRoads}
                   selectedIncident={selectedIncident}
                   onSelectIncident={handleOpenInspect}
                 />
@@ -308,6 +318,7 @@ export const App: React.FC = () => {
                 units={units}
                 hospitals={hospitals}
                 trafficSignals={trafficSignals}
+                onSelectRouteForMap={(r) => setSelectedRouteForMap(r)}
                 onCorridorActivated={(session) => {
                   setActiveCorridor(session);
                   loadData();
@@ -325,6 +336,8 @@ export const App: React.FC = () => {
                 hospitals={hospitals}
                 trafficSignals={trafficSignals}
                 activeCorridor={activeCorridor}
+                selectedRoute={selectedRouteForMap}
+                trafficRoads={trafficRoads}
                 selectedIncident={selectedIncident}
                 onSelectIncident={handleOpenInspect}
               />

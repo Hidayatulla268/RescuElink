@@ -1,0 +1,18 @@
+{
+  "short_name": "RescuELINK",
+  "name": "RescuELINK — Autonomous Smart City Emergency Dispatch & Resilience Hub",
+  "description": "Autonomous AI Emergency Dispatch, Green Corridor Traffic Signal Preemption, and Smart City Resilience Command System.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#0B0F17",
+  "background_color": "#0B0F17",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any 192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}

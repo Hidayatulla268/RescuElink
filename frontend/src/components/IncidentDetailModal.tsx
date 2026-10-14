@@ -5,8 +5,9 @@ import {
 import { api } from '../services/api';
 import { 
   X, ShieldAlert, Cpu, Users, MapPin, Phone, User, 
-  Send, CheckSquare, Square, Radio, AlertTriangle, Sparkles, CheckCircle2, ChevronRight
+  Send, CheckSquare, Square, Radio, AlertTriangle, Sparkles, CheckCircle2, ChevronRight, Camera
 } from 'lucide-react';
+
 
 interface IncidentDetailModalProps {
   incident: Incident | null;
@@ -193,15 +194,38 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
             </div>
           </div>
 
+          {/* Attached Photo Evidence Preview */}
+          {incident.image_url && (
+            <div className="rounded-xl overflow-hidden border border-cyan-500/30 bg-black/50 space-y-2">
+              <div className="px-3.5 py-2 bg-slate-900/80 border-b border-white/10 flex items-center justify-between text-[11px] font-mono">
+                <span className="text-cyan-300 font-bold flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-rose-400" />
+                  <span>Citizen Uploaded Photographic Evidence (Scene Verification)</span>
+                </span>
+                <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px] font-bold">
+                  Field Capture
+                </span>
+              </div>
+              <div className="p-2 flex justify-center">
+                <img 
+                  src={incident.image_url} 
+                  alt="Incident Scene" 
+                  className="max-h-72 w-full object-cover rounded-lg border border-white/10" 
+                />
+              </div>
+            </div>
+          )}
+
           {/* Raw Intake Description */}
           <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-800 space-y-1.5 font-mono text-xs">
             <span className="text-slate-500 uppercase font-bold tracking-wider text-[10px]">
-              Raw 911 / Citizen Voice Transcription
+              112 / 108 Emergency Citizen Statement & Transcription
             </span>
             <p className="text-slate-300 italic leading-relaxed">
               "{incident.raw_description}"
             </p>
           </div>
+
 
           {/* Gemini AI Triage Breakdown */}
           {incident.triage && (

@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
 import { 
   Incident, ResponderUnit, IoTSensor, Hospital, TrafficSignal, 
-  GreenCorridorTransitSession, GovernmentUser 
+  GreenCorridorTransitSession, GovernmentUser, RoadSegment, HospitalRouteOption 
 } from '../types';
 import { 
   AlertTriangle, Shield, MapPin, Camera, Radio, 
@@ -19,6 +18,7 @@ interface MobileAppViewProps {
   trafficSignals: TrafficSignal[];
   activeCorridor: GreenCorridorTransitSession | null;
   governmentUser: GovernmentUser | null;
+  trafficRoads?: RoadSegment[];
   onOpenInspect: (incident: Incident) => void;
   onOpenNewIncident: () => void;
   onOpenSnapAccident: () => void;
@@ -35,6 +35,7 @@ export const MobileAppView: React.FC<MobileAppViewProps> = ({
   trafficSignals,
   activeCorridor,
   governmentUser,
+  trafficRoads = [],
   onOpenInspect,
   onOpenNewIncident,
   onOpenSnapAccident,
@@ -43,6 +44,7 @@ export const MobileAppView: React.FC<MobileAppViewProps> = ({
   onCorridorActivated
 }) => {
   const [mobileTab, setMobileTab] = useState<'feed' | 'map' | 'corridor' | 'profile'>('feed');
+  const [selectedRouteForMap, setSelectedRouteForMap] = useState<HospitalRouteOption | null>(null);
   const [currentTime] = useState(() => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
 
   const activeP1 = incidents.filter(i => i.priority === 'P1' && i.status !== 'RESOLVED');
@@ -216,6 +218,8 @@ export const MobileAppView: React.FC<MobileAppViewProps> = ({
                 hospitals={hospitals}
                 trafficSignals={trafficSignals}
                 activeCorridor={activeCorridor}
+                selectedRoute={selectedRouteForMap}
+                trafficRoads={trafficRoads}
                 selectedIncident={incidents[0] || null}
                 onSelectIncident={(inc) => onOpenInspect(inc)}
               />
@@ -239,6 +243,7 @@ export const MobileAppView: React.FC<MobileAppViewProps> = ({
                 units={units}
                 hospitals={hospitals}
                 trafficSignals={trafficSignals}
+                onSelectRouteForMap={(r) => setSelectedRouteForMap(r)}
                 onCorridorActivated={onCorridorActivated}
               />
             </div>
