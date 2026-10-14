@@ -249,3 +249,26 @@ export interface AutoScrambleResult {
   available_hospitals: Hospital[];
 }
 
+export type ViewMode = 'web' | 'mobile';
+
+export type GovernmentRole = 
+  | 'AMBULANCE_DRIVER'
+  | 'FIRE_OFFICER'
+  | 'POLICE_OFFICER'
+  | 'HOSPITAL_TRAUMA_CHIEF'
+  | 'CITY_DISPATCH_OPERATOR';
+
+export interface GovernmentUser {
+  id: string;
+  badgeNumber: string;
+  fullName: string;
+  role: GovernmentRole;
+  roleTitle: string;
+  agencyName: string;
+  callsign?: string;
+  assignedUnitId?: string;
+  assignedHospitalId?: string;
+  clearanceLevel: string;
+  loggedAt: string;
+}
+

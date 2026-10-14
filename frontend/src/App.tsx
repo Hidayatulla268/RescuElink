@@ -10,26 +10,35 @@ import { CitizenBroadcastModal } from './components/CitizenBroadcastModal';
 import { AnalyticsView } from './components/AnalyticsView';
 import { GreenCorridorCockpit } from './components/GreenCorridorCockpit';
 import { CitizenSnapModal } from './components/CitizenSnapModal';
+import { GovernmentLoginModal } from './components/GovernmentLoginModal';
+import { MobileAppView } from './components/MobileAppView';
 import { 
   Incident, ResponderUnit, IoTSensor, Hospital, TrafficSignal, 
-  GreenCorridorTransitSession, AutoScrambleResult 
+  GreenCorridorTransitSession, AutoScrambleResult, GovernmentUser, ViewMode 
 } from './types';
 import { api, RealtimeClient } from './services/api';
 
 export const App: React.FC = () => {
+  const [viewMode, setViewMode] = useState<ViewMode>('web');
+  const [governmentUser, setGovernmentUser] = useState<GovernmentUser | null>(null);
   const [activeTab, setActiveTab] = useState<'command' | 'map' | 'corridor' | 'sensors' | 'analytics'>('command');
+  
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [units, setUnits] = useState<ResponderUnit[]>([]);
   const [sensors, setSensors] = useState<IoTSensor[]>([]);
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [trafficSignals, setTrafficSignals] = useState<TrafficSignal[]>([]);
   const [activeCorridor, setActiveCorridor] = useState<GreenCorridorTransitSession | null>(null);
+  
+  // Highlighted incident on Map vs Inspected incident in Modal
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
+  const [inspectingIncident, setInspectingIncident] = useState<Incident | null>(null);
   
   // Modals
   const [isNewIncidentOpen, setIsNewIncidentOpen] = useState<boolean>(false);
   const [isSnapModalOpen, setIsSnapModalOpen] = useState<boolean>(false);
   const [isBroadcastOpen, setIsBroadcastOpen] = useState<boolean>(false);
+  const [isGovLoginOpen, setIsGovLoginOpen] = useState<boolean>(false);
   const [broadcastIncident, setBroadcastIncident] = useState<Incident | null>(null);
 
   // Initial Data Load
@@ -48,15 +57,18 @@ export const App: React.FC = () => {
       setHospitals(hospList);
       setTrafficSignals(sigList);
 
-      // Default select the first P1 incident if none selected
-      if (!selectedIncident && incList.length > 0) {
-        const topP1 = incList.find(i => i.priority === 'P1');
-        setSelectedIncident(topP1 || incList[0]);
-      }
+      // Default select the first P1 incident for map focus only if none selected
+      setSelectedIncident(prev => {
+        if (!prev && incList.length > 0) {
+          const topP1 = incList.find(i => i.priority === 'P1');
+          return topP1 || incList[0];
+        }
+        return prev;
+      });
     } catch (err) {
       console.warn('Initial fetch issue (backend may still be bootstrapping):', err);
     }
-  }, [selectedIncident]);
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -93,15 +105,24 @@ export const App: React.FC = () => {
   }, [loadData]);
 
   // Modal & Action Handlers
+  const handleOpenInspect = (inc: Incident) => {
+    setSelectedIncident(inc);
+    setInspectingIncident(inc);
+  };
+
   const handleIncidentCreated = (newInc: Incident) => {
     setIncidents(prev => [newInc, ...prev.filter(i => i.id !== newInc.id)]);
     setSelectedIncident(newInc);
+    setInspectingIncident(newInc);
   };
 
   const handleAutoScrambled = (result: AutoScrambleResult) => {
     loadData();
     const found = incidents.find(i => i.id === result.incident_id);
-    if (found) setSelectedIncident(found);
+    if (found) {
+      setSelectedIncident(found);
+      setInspectingIncident(found);
+    }
   };
 
   const handleDispatchSuccess = (incidentId: string, unitIds: string[]) => {
@@ -112,6 +133,9 @@ export const App: React.FC = () => {
     loadData();
     if (selectedIncident?.id === incidentId) {
       setSelectedIncident(null);
+    }
+    if (inspectingIncident?.id === incidentId) {
+      setInspectingIncident(null);
     }
   };
 
@@ -138,33 +162,104 @@ export const App: React.FC = () => {
   const totalActiveCount = incidents.filter(i => i.status !== 'RESOLVED').length;
 
   return (
-    <div className="min-h-screen bg-command-bg flex flex-col tactical-grid select-none">
-      {/* Top Header Command Bar */}
+    <div className="min-h-screen bg-[#080C14] flex flex-col tactical-grid select-none">
+      {/* Top Header Command Bar with View Switcher & Gov Access */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        governmentUser={governmentUser}
+        onOpenGovLogin={() => setIsGovLoginOpen(true)}
         onOpenNewIncident={() => setIsNewIncidentOpen(true)}
         onOpenSnapAccident={() => setIsSnapModalOpen(true)}
         activeP1Count={activeP1Count}
         totalActiveCount={totalActiveCount}
       />
 
-      {/* Main View Area */}
-      <main className="flex-1 flex flex-col p-3 sm:p-4 max-w-[1920px] w-full mx-auto overflow-hidden">
-        {activeTab === 'command' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 h-[calc(100vh-84px)]">
-            {/* Left Column: Live Incident Feed (4 cols) */}
-            <div className="lg:col-span-4 h-full flex flex-col">
-              <IncidentFeed
-                incidents={incidents}
-                selectedIncident={selectedIncident}
-                onSelectIncident={(inc) => setSelectedIncident(inc)}
-                onOpenNewIncident={() => setIsNewIncidentOpen(true)}
+      {/* Main View: Dual-Form (Desktop Web Console vs Mobile App) */}
+      {viewMode === 'mobile' ? (
+        <MobileAppView
+          incidents={incidents}
+          units={units}
+          sensors={sensors}
+          hospitals={hospitals}
+          trafficSignals={trafficSignals}
+          activeCorridor={activeCorridor}
+          governmentUser={governmentUser}
+          onOpenInspect={handleOpenInspect}
+          onOpenNewIncident={() => setIsNewIncidentOpen(true)}
+          onOpenSnapAccident={() => setIsSnapModalOpen(true)}
+          onOpenGovLogin={() => setIsGovLoginOpen(true)}
+          onOpenBroadcast={handleOpenBroadcast}
+          onCorridorActivated={(session) => {
+            setActiveCorridor(session);
+            loadData();
+          }}
+        />
+      ) : (
+        <main className="flex-1 flex flex-col p-3 sm:p-4 max-w-[1920px] w-full mx-auto overflow-hidden">
+          {activeTab === 'command' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 h-[calc(100vh-84px)]">
+              {/* Left Column: Live Incident Feed (4 cols) */}
+              <div className="lg:col-span-4 h-full flex flex-col">
+                <IncidentFeed
+                  incidents={incidents}
+                  selectedIncident={selectedIncident}
+                  onSelectIncident={handleOpenInspect}
+                  onOpenNewIncident={() => setIsNewIncidentOpen(true)}
+                />
+              </div>
+
+              {/* Middle Column: Tactical Radar GIS Map with Traffic Signals & Hospitals (5 cols) */}
+              <div className="lg:col-span-5 h-full flex flex-col">
+                <IncidentMap
+                  incidents={incidents}
+                  units={units}
+                  sensors={sensors}
+                  hospitals={hospitals}
+                  trafficSignals={trafficSignals}
+                  activeCorridor={activeCorridor}
+                  selectedIncident={selectedIncident}
+                  onSelectIncident={handleOpenInspect}
+                />
+              </div>
+
+              {/* Right Column: Fleet Management & IoT Telemetry (3 cols) */}
+              <div className="lg:col-span-3 h-full flex flex-col gap-4">
+                <div className="h-1/2">
+                  <DispatchControl
+                    units={units}
+                    onUnitUpdated={() => loadData()}
+                  />
+                </div>
+                <div className="h-1/2">
+                  <SensorMonitor
+                    sensors={sensors}
+                    onInjectSpike={handleInjectSpike}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Dedicated Green Corridor Cockpit Tab */}
+          {activeTab === 'corridor' && (
+            <div className="flex-1 overflow-y-auto">
+              <GreenCorridorCockpit
+                units={units}
+                hospitals={hospitals}
+                trafficSignals={trafficSignals}
+                onCorridorActivated={(session) => {
+                  setActiveCorridor(session);
+                  loadData();
+                }}
               />
             </div>
+          )}
 
-            {/* Middle Column: Tactical Radar GIS Map with Traffic Signals & Hospitals (5 cols) */}
-            <div className="lg:col-span-5 h-full flex flex-col">
+          {activeTab === 'map' && (
+            <div className="flex-1 h-[calc(100vh-84px)] flex flex-col">
               <IncidentMap
                 incidents={incidents}
                 units={units}
@@ -173,78 +268,32 @@ export const App: React.FC = () => {
                 trafficSignals={trafficSignals}
                 activeCorridor={activeCorridor}
                 selectedIncident={selectedIncident}
-                onSelectIncident={(inc) => setSelectedIncident(inc)}
+                onSelectIncident={handleOpenInspect}
               />
             </div>
+          )}
 
-            {/* Right Column: Fleet Management & IoT Telemetry (3 cols) */}
-            <div className="lg:col-span-3 h-full flex flex-col gap-4">
-              <div className="h-1/2">
-                <DispatchControl
-                  units={units}
-                  onUnitUpdated={() => loadData()}
-                />
-              </div>
-              <div className="h-1/2">
-                <SensorMonitor
-                  sensors={sensors}
-                  onInjectSpike={handleInjectSpike}
-                />
-              </div>
+          {activeTab === 'sensors' && (
+            <div className="flex-1 h-[calc(100vh-84px)]">
+              <SensorMonitor
+                sensors={sensors}
+                onInjectSpike={handleInjectSpike}
+              />
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Dedicated Green Corridor Cockpit Tab */}
-        {activeTab === 'corridor' && (
-          <div className="flex-1 overflow-y-auto">
-            <GreenCorridorCockpit
-              units={units}
-              hospitals={hospitals}
-              trafficSignals={trafficSignals}
-              onCorridorActivated={(session) => {
-                setActiveCorridor(session);
-                loadData();
-              }}
-            />
-          </div>
-        )}
+          {activeTab === 'analytics' && (
+            <div className="flex-1 overflow-y-auto">
+              <AnalyticsView />
+            </div>
+          )}
+        </main>
+      )}
 
-        {activeTab === 'map' && (
-          <div className="flex-1 h-[calc(100vh-84px)] flex flex-col">
-            <IncidentMap
-              incidents={incidents}
-              units={units}
-              sensors={sensors}
-              hospitals={hospitals}
-              trafficSignals={trafficSignals}
-              activeCorridor={activeCorridor}
-              selectedIncident={selectedIncident}
-              onSelectIncident={(inc) => setSelectedIncident(inc)}
-            />
-          </div>
-        )}
-
-        {activeTab === 'sensors' && (
-          <div className="flex-1 h-[calc(100vh-84px)]">
-            <SensorMonitor
-              sensors={sensors}
-              onInjectSpike={handleInjectSpike}
-            />
-          </div>
-        )}
-
-        {activeTab === 'analytics' && (
-          <div className="flex-1 overflow-y-auto">
-            <AnalyticsView />
-          </div>
-        )}
-      </main>
-
-      {/* Modals */}
+      {/* Modals — Fully accessible across both Web Console and Mobile App */}
       <IncidentDetailModal
-        incident={selectedIncident}
-        onClose={() => setSelectedIncident(null)}
+        incident={inspectingIncident}
+        onClose={() => setInspectingIncident(null)}
         onDispatchSuccess={handleDispatchSuccess}
         onResolveSuccess={handleResolveSuccess}
         onOpenBroadcast={handleOpenBroadcast}
@@ -261,13 +310,24 @@ export const App: React.FC = () => {
         isOpen={isSnapModalOpen}
         onClose={() => setIsSnapModalOpen(false)}
         onAutoScrambled={handleAutoScrambled}
-        onOpenGreenCorridor={() => setActiveTab('corridor')}
+        onOpenGreenCorridor={() => {
+          setIsSnapModalOpen(false);
+          setActiveTab('corridor');
+        }}
       />
 
       <CitizenBroadcastModal
         incident={broadcastIncident || selectedIncident}
         isOpen={isBroadcastOpen}
         onClose={() => setIsBroadcastOpen(false)}
+      />
+
+      <GovernmentLoginModal
+        isOpen={isGovLoginOpen}
+        onClose={() => setIsGovLoginOpen(false)}
+        currentUser={governmentUser}
+        onLogin={(u) => setGovernmentUser(u)}
+        onLogout={() => setGovernmentUser(null)}
       />
     </div>
   );

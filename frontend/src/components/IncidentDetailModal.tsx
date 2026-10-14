@@ -88,6 +88,16 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
     }
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const toggleSOP = (idx: number) => {
     setCompletedSOPs(prev => ({ ...prev, [idx]: !prev[idx] }));
   };
@@ -95,17 +105,25 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
   const isResolved = incident.status === 'RESOLVED';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-4xl bg-command-panel border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh]">
+    <div 
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-2xl overflow-y-auto animate-fadeIn"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-4xl glass-card-ultra border border-white/20 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col my-auto max-h-[92vh] animate-modal-in"
+      >
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/60">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-slate-900/40 backdrop-blur-md">
           <div className="flex items-center gap-3">
-            <span className={`px-2.5 py-1 rounded text-xs font-bold font-mono border ${
+            <span className={`px-2.5 py-1 rounded-full text-xs font-bold font-mono border ${
               incident.priority === 'P1'
-                ? 'bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-neon-red'
+                ? 'bg-rose-500/20 text-rose-300 border-rose-500/60 shadow-neon-red animate-pulse'
                 : incident.priority === 'P2'
-                ? 'bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-neon-amber'
-                : 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40'
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/60 shadow-neon-amber'
+                : 'bg-yellow-500/20 text-yellow-200 border-yellow-500/40'
             }`}>
               {incident.priority} CRITICAL
             </span>
@@ -114,7 +132,7 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                 <span>{incident.title}</span>
                 <span className="text-xs text-slate-400 font-normal">({incident.id})</span>
               </h2>
-              <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+              <p className="text-xs text-slate-300 flex items-center gap-1 mt-0.5">
                 <MapPin className="w-3.5 h-3.5 text-cyan-400" />
                 <span>{incident.location_address}</span>
               </p>
@@ -123,7 +141,8 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+            className="p-2.5 rounded-full bg-white/10 hover:bg-rose-500/30 text-slate-300 hover:text-white border border-white/10 hover:border-rose-500/50 transition-all duration-200 active:scale-95 shadow-md"
+            title="Close modal (Esc)"
           >
             <X className="w-5 h-5" />
           </button>
@@ -345,15 +364,15 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
             {!isResolved && (
               <button
                 onClick={handleResolve}
-                className="px-3.5 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500/40 text-emerald-300 font-semibold flex items-center gap-1.5 transition"
+                className="px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/35 border border-emerald-400/40 text-emerald-200 font-semibold flex items-center gap-2 shadow-lg hover:shadow-emerald-500/20 transition active:scale-95"
               >
-                <CheckCircle2 className="w-3.5 h-3.5" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 <span>Mark Incident Resolved</span>
               </button>
             )}
             <button
               onClick={onClose}
-              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+              className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-slate-200 hover:text-white transition active:scale-95"
             >
               Close
             </button>

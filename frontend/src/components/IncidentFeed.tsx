@@ -78,22 +78,22 @@ export const IncidentFeed: React.FC<IncidentFeedProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-command-panel/80 rounded-xl border border-command-border backdrop-blur-md overflow-hidden">
+    <div className="flex flex-col h-full glass-card-ultra rounded-3xl border border-white/15 backdrop-blur-2xl overflow-hidden shadow-2xl">
       {/* Header & Filter Controls */}
-      <div className="p-3 border-b border-command-border space-y-2.5">
+      <div className="p-3.5 border-b border-white/10 space-y-2.5 bg-slate-900/40">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 font-mono">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-100">
+            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-neon-blue"></span>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-white">
               Live Incident Dispatch Stream
             </h2>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-cyan-400 border border-slate-700">
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-white/10 text-cyan-300 border border-white/15 font-bold">
               {filteredIncidents.length}
             </span>
           </div>
           <button
             onClick={onOpenNewIncident}
-            className="text-xs font-mono px-2 py-1 rounded bg-rose-600/80 hover:bg-rose-500 text-white transition flex items-center gap-1 shadow-sm"
+            className="text-xs font-mono px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-500 hover:to-red-400 text-white font-bold transition flex items-center gap-1.5 shadow-neon-red active:scale-95"
           >
             <span>+ Report SOS</span>
           </button>
@@ -160,12 +160,12 @@ export const IncidentFeed: React.FC<IncidentFeedProps> = ({
               <div
                 key={inc.id}
                 onClick={() => onSelectIncident(inc)}
-                className={`group relative p-3 rounded-lg border transition-all duration-200 cursor-pointer ${
+                className={`group relative p-3.5 rounded-2xl border transition-all duration-300 cursor-pointer backdrop-blur-md ${
                   isSelected
-                    ? 'bg-slate-800/90 border-cyan-400 shadow-neon-blue'
+                    ? 'glass-card-ultra border-cyan-400 shadow-neon-blue scale-[1.01]'
                     : isResolved
-                    ? 'bg-slate-900/40 border-slate-800/60 opacity-60 hover:opacity-100'
-                    : 'bg-command-surface/70 hover:bg-slate-800/60 border-slate-800 hover:border-slate-700'
+                    ? 'bg-white/[0.02] border-white/5 opacity-60 hover:opacity-100'
+                    : 'bg-white/[0.04] hover:bg-white/[0.08] border-white/10 hover:border-cyan-500/40 hover:scale-[1.01]'
                 }`}
               >
                 {/* Header row: Priority + Status + ID */}

@@ -31,7 +31,9 @@ RescuELINK is an end-to-end, full-stack autonomous emergency response and urban 
 
 ### 5. 📊 Urban Resilience Matrix & Threat Analytics
 - Computes the municipal **Resilience Score (0–100)** in real-time based on incident load, available fleet capacity, and critical sensor thresholds.
-- Identifies predictive urban vulnerability hotspots before casc### 6. 🟢 GreenCorridor AI™ (Driver In-Cab Transit & Traffic Light Preemption)
+- Identifies predictive urban vulnerability hotspots before cascading failures occur.
+
+### 6. 🟢 GreenCorridor AI™ (Driver In-Cab Transit & Traffic Light Preemption)
 - **Ambulance Driver Departure Console**: When an ambulance departs from any location, the driver sets their departure point and selects the destination Receiving Trauma Center.
 - **Route Clearance Broadcast**: The system instantly transmits digital route-clearance notices across the municipal traffic network.
 - **< 1.0 km Smart Traffic Signal Preemption**: As the en-route ambulance approaches within 1.0 km of any intersecting traffic light, the signal is autonomously overridden into **100% EMERGENCY GREEN**, locking cross-traffic to RED and clearing crosswalks.
@@ -42,6 +44,19 @@ RescuELINK is an end-to-end, full-stack autonomous emergency response and urban 
 - **Gemini 3.8 Flash Multimodal Vision**: Performs instant damage assessment, detects vehicle crumple zones, hazardous fluid leaks, trapped victims, and computes triage severity.
 - **Zero-Delay Nearest Idle Ambulance Auto-Scramble**: Automatically scans all registered emergency vehicles on duty, locates the closest idle unit via Haversine geolocation, and immediately scrambles it with priority status.
 - **Seamless Green Corridor Handover**: Once the scrambled unit reaches the scene and boards the victim, the driver launches the Green Corridor directly to the nearest trauma hospital.
+
+### 8. 📱 Dual Form Factor: Desktop Command Hub & Mobile Responder App
+- **1-Click Form Switcher**: Switch instantly between the **Desktop Web Command Center** (multi-column wide console, tactical GIS radar, fleet controls) and the **Mobile Responder App** (smartphone bezel, status bar, bottom touch tabs).
+- **100% Synchronized Real-Time State**: All actions in either form (snapping crash photos, triggering Green Corridors, resolving incidents) synchronize instantly across both forms via the shared WebSocket bus.
+
+### 9. 🏛️ Optional Government & First Responder Login Portal
+- **Zero Barriers for Public Citizens**: Bystanders and citizens can report emergencies, snap accident photos, and view alerts with **no login required**.
+- **Role-Based Government Authentication (Optional)**: Emergency personnel can authenticate with 1-click verified role profiles or custom badge IDs:
+  - 🚑 **Ambulance / Paramedic Transit Driver** (`EMS-DRV-104`)
+  - 🚒 **Fire Rescue Battalion Chief** (`FD-CHIEF-12`)
+  - 🚓 **Transit & Highway Patrol Supervisor** (`PD-TAC-09`)
+  - 🏥 **Trauma Hospital ER Chief** (`MD-TRAUMA-01`)
+  - 🏢 **911 Operations Command Director** (`GOV-ROOT-911`)
 
 ---
 
@@ -68,10 +83,12 @@ prompt_wars/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Navbar.tsx           # Command HUD, status badges, local clock, & SOS Snap trigger
+│   │   │   ├── Navbar.tsx           # Dual-form switcher, Gov access, status badges
+│   │   │   ├── MobileAppView.tsx    # Smartphone chassis form with touch tabs
+│   │   │   ├── GovernmentLoginModal.tsx # Optional role-based authentication portal
 │   │   │   ├── IncidentMap.tsx      # Tactical GIS canvas with hospital pins, dynamic signals & corridors
-│   │   │   ├── IncidentFeed.tsx     # Live stream with P1-P4 priority filters
-│   │   │   ├── IncidentDetailModal.tsx # Multimodal inspection & SOP checklist
+│   │   │   ├── IncidentFeed.tsx     # Live stream with P1-P4 priority filters & glassmorphic cards
+│   │   │   ├── IncidentDetailModal.tsx # Multimodal inspection, SOP checklist & dismiss controls
 │   │   │   ├── NewIncidentModal.tsx # Citizen SOS intake with 1-click demo presets
 │   │   │   ├── GreenCorridorCockpit.tsx # Ambulance driver cab console & signal override tracker
 │   │   │   ├── CitizenSnapModal.tsx # Camera viewfinder & instant auto-scramble SOS
@@ -81,8 +98,8 @@ prompt_wars/
 │   │   │   └── AnalyticsView.tsx    # Urban resilience dashboard
 │   │   ├── services/api.ts          # Typed REST API & WebSocket client
 │   │   ├── types/index.ts           # Strict TypeScript interfaces
-│   │   ├── App.tsx                  # Root application state & real-time events
-│   │   └── index.css                # Glassmorphic tactical styling
+│   │   ├── App.tsx                  # Root application state & dual-form synchronizer
+│   │   └── index.css                # Ultra-glassmorphic styling, animations, & phone frame
 │   └── package.json
 ├── start_system.bat                 # 1-Click Windows launch script
 └── README.md

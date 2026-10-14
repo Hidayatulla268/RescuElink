@@ -86,20 +86,40 @@ export const CitizenSnapModal: React.FC<CitizenSnapModalProps> = ({
     }
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-2xl bg-command-panel border border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh] font-mono">
+    <div 
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-2xl overflow-y-auto"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-2xl glass-card-ultra border border-white/20 rounded-3xl shadow-[0_25px_70px_rgba(0,0,0,0.85)] overflow-hidden flex flex-col my-auto max-h-[92vh] font-mono animate-modal-in"
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/60">
-          <div className="flex items-center gap-2.5">
-            <span className="p-2 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/40">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-slate-900/50 backdrop-blur-md">
+          <div className="flex items-center gap-3">
+            <span className="p-2.5 rounded-2xl bg-rose-500/20 text-rose-300 border border-rose-500/50 shadow-neon-red">
               <Camera className="w-5 h-5 animate-pulse" />
             </span>
             <div>
               <h2 className="text-base font-bold text-white uppercase tracking-wider">
                 Road Accident Photo SOS — Instant Ambulance Auto-Scramble
               </h2>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-slate-400 mt-0.5">
                 AI Scene Verification & Zero-Delay Nearest Ambulance Mobilization
               </p>
             </div>
@@ -107,7 +127,8 @@ export const CitizenSnapModal: React.FC<CitizenSnapModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+            className="p-2.5 rounded-full bg-white/10 hover:bg-rose-500/30 text-slate-300 hover:text-white border border-white/10 hover:border-rose-500/50 transition active:scale-95 shadow-md"
+            title="Close (Esc)"
           >
             <X className="w-5 h-5" />
           </button>
