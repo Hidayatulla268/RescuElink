@@ -180,34 +180,5 @@ python backend/verify_backend.py
 
 ---
 
-## 🎬 Suggested Demonstration Flow for Reviewers & Judges
-
-1. **Review the Tactical GIS & ISRO Satellite Radar**:
-   - Toggle between **Tactical Grid** and **ISRO Satellite** mode to view orbital recon textures, Bengaluru water bodies, and highway corridors.
-   - Click on traffic junctions (e.g., Silk Board) and hospitals (e.g., Apollo, Manipal) to inspect real-time readiness.
-2. **Citizen Road Accident Photo SOS with Auto-Scramble**:
-   - Click **"📸 SNAP ACCIDENT SOS"** in the top navigation bar.
-   - Choose a road accident scenario (e.g., *Outer Ring Road Multi-Vehicle Crash*).
-   - Click **"Transmit Accident Photo & Auto-Scramble Free Ambulance"**.
-   - Watch Gemini 3.8 Flash visually analyze the crash scene, pinpoint trapped victims, identify the nearest available on-duty ambulance (`108-TRAUMA-CRITICAL`, Pilot Suresh), and dispatch it with zero delay!
-3. **Ambulance Driver Green Corridor & Signal Preemption**:
-   - Click **"🟢 Green Corridor AI"** to open the In-Cab Driver Console.
-   - Select ambulance (`108-TRAUMA-CRITICAL`), pickup point, and destination trauma center (e.g., *Apollo Multi-Speciality Trauma Center*).
-   - Click **"Initiate Green Corridor & Alert Hospital"**.
-   - Notice:
-     - Route clearance notification broadcasted immediately.
-     - Destination hospital ER receives pre-arrival alert with reserved trauma bay.
-     - When the ambulance approaches within **1.0 km**, signals dynamically turn into **100% EMERGENCY GREEN**.
-4. **Dual Form Factor (Web + Mobile App)**:
-   - Click the **"📱 Mobile App"** toggle in the header.
-   - Experience the smartphone app interface with bottom touch tabs, ambulance driver controls, and camera viewfinder.
-5. **Optional Government Login**:
-   - Click **"🏛️ GOV ACCESS"** in the navigation bar.
-   - Try 1-click login as Ambulance Pilot, Police Inspector, Fire Chief, Trauma ER Director, or 112 Dispatch Commander.
-6. **Multilingual Indian Citizen Alert Studio**:
-   - Click **"📢 Citizen Alerts"** and select Hindi, Kannada, Tamil, Telugu, or Bengali to broadcast localized emergency instructions.
-
----
-
 ## 🛡️ Autonomous Safety & Fallback Engine
 RescuELINK is built to be 100% mission-critical. If external network access or API limits occur, the embedded **Deterministic Heuristic Triage Engine** automatically activates, ensuring zero downtime, zero broken promises, and uninterrupted presentation flow.
